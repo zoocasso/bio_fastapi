@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Scientific Detail</title>
+    <link href="{{url_for('static',path='/style.css')}}" rel="stylesheet">
+    <link href="https://unpkg.com/tabulator-tables@5.4.3/dist/css/tabulator_semanticui.min.css" rel="stylesheet">
+</head>
+<body>
+    <h1>Scientific Detail</h1>
+    <h3>disease_trait_list : {{bio_input}}</h3>
+    <p><strong>summary</strong> : {{summary}}</p>
+    <p><strong>scientific detail</strong></p>
+    <div id="scientific_detail"></div>
+
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
+    <script>
+    var scientific_detail = {{scientific_detail|tojson}};
+    var amz_table = new Tabulator('#scientific_detail',{
+        data:scientific_detail,
+        pagination:"local",
+        paginationSize:10,
+        columns:[
+            // {formatter:"rowSelection", titleFormatter:"rowSelection", hozAlign:"center", 
+            // headerSort:false
+            // },
+            {title:"DISEASE_TRAIT", field:"DISEASE_TRAIT", headerFilter:"input"},
+            {title:"SNPS", field:"SNPS", headerFilter:"input"},
+            {title:"GENENAME", field:"GENENAME", headerFilter:"input"},
+            {title:"CONTEXT", field:"CONTEXT", headerFilter:"input"},
+            {title:"EFFECT_ALLELE", field:"EFFECT_ALLELE", headerFilter:"input"},
+            {title:"ALLELE_1", field:"ALLELE_1", headerFilter:"input"},
+            {title:"ALLELE_2", field:"ALLELE_2", headerFilter:"input"},
+            {title:"LINK", field:"LINK", headerFilter:"input"},
+            {title:"AUTHOR", field:"AUTHOR", headerFilter:"input"},
+            {title:"JOURNAL", field:"JOURNAL", headerFilter:"input"},
+            {title:"STUDY", field:"STUDY", headerFilter:"input"},
+        ],
+    });
+    </script>
+</body>
+</html>

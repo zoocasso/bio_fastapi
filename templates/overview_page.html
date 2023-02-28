@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Overview</title>
+    <link href="{{url_for('static',path='/style.css')}}" rel="stylesheet">
+    <link href="https://unpkg.com/tabulator-tables@5.4.3/dist/css/tabulator_semanticui.min.css" rel="stylesheet">
+</head>
+<body>
+    <h1>Overview</h1>
+    <h3>disease_trait_list : {{bio_input}}</h3>
+    <p><strong>summary</strong> : {{summary}}</p>
+    <h3>we found {{snps_cnt}} of your genetic variants related with {{bio_input}}</h3>
+    <p><strong>snps_riskscore_1kgp</strong></p>
+    <div id="snps_riskscore_1kgp"></div>
+    <p><strong>medlineplus</strong> : {{medlineplus}}</p>
+    <p><strong>tkm</strong> : {{tkm}}</p>
+    <p><strong>medicine</strong></p>
+    <div id="medicine"></div>
+
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
+    <script src="{{url_for('static',path='/js/script.js')}}"></script>
+    <script>
+        var snps_riskscore_1kgp = {{snps_riskscore_1kgp|tojson}};
+        var amz_table = new Tabulator('#snps_riskscore_1kgp',{
+            data:snps_riskscore_1kgp,
+            pagination:"local",
+            paginationSize:10,
+            columns:[
+                // {formatter:"rowSelection", titleFormatter:"rowSelection", hozAlign:"center", 
+                // headerSort:false
+                // },
+                {title:"DISEASE_TRAIT", field:"DISEASE_TRAIT", headerFilter:"input"},
+                {title:"SNPS", field:"SNPS", headerFilter:"input"},
+                {title:"risk_score", field:"risk_score", headerFilter:"input"},
+                {title:"GBR", field:"GBR", headerFilter:"input"},
+                {title:"FIN", field:"FIN", headerFilter:"input"},
+                {title:"CHS", field:"CHS", headerFilter:"input"},
+                {title:"PUR", field:"PUR", headerFilter:"input"},
+                {title:"CDX", field:"CDX", headerFilter:"input"},
+                {title:"CLM", field:"CLM", headerFilter:"input"},
+                {title:"IBS", field:"IBS", headerFilter:"input"},
+                {title:"PEL", field:"PEL", headerFilter:"input"},
+                {title:"PJL", field:"PJL", headerFilter:"input"},
+                {title:"KHV", field:"KHV", headerFilter:"input"},
+                {title:"ACB", field:"ACB", headerFilter:"input"},
+                {title:"GWD", field:"GWD", headerFilter:"input"},
+                {title:"ESN", field:"ESN", headerFilter:"input"},
+                {title:"BEB", field:"BEB", headerFilter:"input"},
+                {title:"MSL", field:"MSL", headerFilter:"input"},
+                {title:"STU", field:"STU", headerFilter:"input"},
+                {title:"ITU", field:"ITU", headerFilter:"input"},
+                {title:"CEU", field:"CEU", headerFilter:"input"},
+                {title:"YRI", field:"YRI", headerFilter:"input"},
+                {title:"CHB", field:"CHB", headerFilter:"input"},
+                {title:"JPT", field:"JPT", headerFilter:"input"},
+                {title:"LWK", field:"LWK", headerFilter:"input"},
+                {title:"ASW", field:"ASW", headerFilter:"input"},
+                {title:"MXL", field:"MXL", headerFilter:"input"},
+                {title:"TSI", field:"TSI", headerFilter:"input"},
+                {title:"GIH", field:"GIH", headerFilter:"input"},
+            ],
+        });
+
+
+
+        var medicine = {{medicine|tojson}};
+        var amz_table = new Tabulator('#medicine',{
+            data:medicine,
+            pagination:"local",
+            paginationSize:10,
+            columns:[
+                // {formatter:"rowSelection", titleFormatter:"rowSelection", hozAlign:"center", 
+                // headerSort:false
+                // },
+                {title:"TKM_KEY", field:"TKM_KEY", headerFilter:"input"},
+                {title:"제품명", field:"제품명", headerFilter:"input"},
+                {title:"제품영문명", field:"제품영문명", headerFilter:"input"},
+            ],
+        });
+    </script>
+</body>
+</html>
