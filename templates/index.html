@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BIO WEB</title>
+    <link href="{{url_for('static',path='/style.css')}}" rel="stylesheet">
+</head>
+<body>
+    <h1>BIO WEB</h1>
+    <form id="form" action="/overview_page" method="get">
+        <h3>Overview</h3>
+        <input type="text" name="bio_input">
+        <input type="submit" value="검색">
+    </form>
+    <form id="form" action="/scientific_detail_page" method="get">
+        <h3>Scientific Detail</h3>
+        <input type="text" name="bio_input">
+        <input type="submit" value="검색">
+    </form>
+    <script  src="{{url_for('static',path='/js/script.js')}}"></script>
+</body>
+</html>
