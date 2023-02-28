@@ -52,7 +52,11 @@ def get_medicine(tkm):
         return None
 
 def get_scientific_detail(bio_input):
-    cursor.execute(f"SELECT DISEASE_TRAIT, SNPS, `VARIANT AA CHANGE`,GENENAME,CONTEXT,EFFECT_ALLELE,ALLELE_1,ALLELE_2,LINK,AUTHOR,JOURNAL,STUDY FROM connect_vcf_dbsnp_gwas_1kgp_uniprot WHERE DISEASE_TRAIT = '{bio_input}';")
+    cursor.execute(f"SELECT DISEASE_TRAIT, SNPS, `VARIANT AA CHANGE`,GENENAME,CONTEXT,EFFECT_ALLELE,ALLELE_1,ALLELE_2 FROM connect_vcf_dbsnp_gwas_1kgp_uniprot WHERE DISEASE_TRAIT = '{bio_input}';")
     rows = cursor.fetchall()
     return rows
     
+def get_reference(bio_input):
+    cursor.execute(f"SELECT distinct LINK,AUTHOR,JOURNAL,STUDY FROM connect_vcf_dbsnp_gwas_1kgp_uniprot WHERE DISEASE_TRAIT = '{bio_input}';")
+    rows = cursor.fetchall()
+    return rows

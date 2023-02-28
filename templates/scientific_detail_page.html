@@ -12,11 +12,13 @@
     <p><strong>summary</strong> : {{summary}}</p>
     <p><strong>scientific detail</strong></p>
     <div id="scientific_detail"></div>
+    <p><strong>reference</strong></p>
+    <div id="reference"></div>
 
     <script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
     <script>
     var scientific_detail = {{scientific_detail|tojson}};
-    var amz_table = new Tabulator('#scientific_detail',{
+    var scientific_detail_table = new Tabulator('#scientific_detail',{
         data:scientific_detail,
         pagination:"local",
         paginationSize:10,
@@ -31,6 +33,17 @@
             {title:"EFFECT_ALLELE", field:"EFFECT_ALLELE", headerFilter:"input"},
             {title:"ALLELE_1", field:"ALLELE_1", headerFilter:"input"},
             {title:"ALLELE_2", field:"ALLELE_2", headerFilter:"input"},
+        ],
+    });
+    var reference = {{reference|tojson}};
+    var reference_table = new Tabulator('#reference',{
+        data:reference,
+        pagination:"local",
+        paginationSize:10,
+        columns:[
+            // {formatter:"rowSelection", titleFormatter:"rowSelection", hozAlign:"center", 
+            // headerSort:false
+            // },
             {title:"LINK", field:"LINK", headerFilter:"input"},
             {title:"AUTHOR", field:"AUTHOR", headerFilter:"input"},
             {title:"JOURNAL", field:"JOURNAL", headerFilter:"input"},

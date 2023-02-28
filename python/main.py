@@ -35,7 +35,8 @@ async def root(request:Request, bio_input:str):
 async def root(request:Request, bio_input:str):
     summary = get_bio_everything.get_summary(bio_input)
     scientific_detail = get_bio_everything.get_scientific_detail(bio_input)
-    return templates.TemplateResponse("scientific_detail_page.html", {"request":request, "bio_input":bio_input, "summary":summary, "scientific_detail":scientific_detail})
+    reference = get_bio_everything.get_reference(bio_input)
+    return templates.TemplateResponse("scientific_detail_page.html", {"request":request, "bio_input":bio_input, "summary":summary, "scientific_detail":scientific_detail,"reference":reference})
 
 
 uvicorn.run(app, host = '127.0.0.1', port = 8000)
