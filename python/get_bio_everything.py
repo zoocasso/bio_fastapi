@@ -7,6 +7,11 @@ connection = pymysql.connect(host='211.34.105.108',
                              cursorclass=pymysql.cursors.DictCursor)
 cursor = connection.cursor()
 
+def get_disease_trait():
+    cursor.execute("select distinct DISEASE_TRAIT FROM connect_vcf_dbsnp_gwas_1kgp_uniprot")
+    rows = cursor.fetchall()
+    return rows
+
 def get_summary(bio_input):
     cursor.execute(f"SELECT content FROM medlineplus WHERE topic_name ='{bio_input}' AND title = 'summary';")
     rows = cursor.fetchall()
@@ -28,16 +33,19 @@ def get_medlineplus(bio_input):
     return rows
 
 def get_tkm(bio_input):
-    cursor.execute(f"SELECT tkm_name FROM pharmdbk_tkm_relation WHERE kinds = '{bio_input}';")
-    tkm_name = cursor.fetchall()
+    try:
+        cursor.execute(f"SELECT tkm_name FROM pharmdbk_tkm_relation WHERE kinds = '{bio_input}';")
+        tkm_name = cursor.fetchall()
 
-    tkm_list = list()
-    for i in tkm_name:
-        tkm_list.append(i['tkm_name'])
-    
-    cursor.execute(f"SELECT * FROM tkm_ref_tb WHERE tkm_eng IN {str(tuple(tkm_list))};")
-    rows = cursor.fetchall()
-    return rows
+        tkm_list = list()
+        for i in tkm_name:
+            tkm_list.append(i['tkm_name'])
+        
+        cursor.execute(f"SELECT * FROM tkm_ref_tb WHERE tkm_eng IN {str(tuple(tkm_list))};")
+        rows = cursor.fetchall()
+        return rows
+    except:
+        return None
 
 def get_medicine(tkm):
     try:

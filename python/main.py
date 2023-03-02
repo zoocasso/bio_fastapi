@@ -19,7 +19,8 @@ templates = Jinja2Templates(directory="templates")
 ## 메인페이지
 @app.get("/")
 async def root(request:Request):
-    return templates.TemplateResponse("index.html", {"request":request})
+    disease_trait = get_bio_everything.get_disease_trait()
+    return templates.TemplateResponse("index.html", {"request":request, "disease_trait":disease_trait})
 
 @app.get("/overview_page")
 async def root(request:Request, bio_input:str):
