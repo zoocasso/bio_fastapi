@@ -1,7 +1,34 @@
+#disease_trait{
+    width:400px;
+}
+
 #index_div{
     height: 100vh;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
+}
+
+#search_div{
+    display: flex;
+    flex-direction:column;
+    align-items: center;
+    justify-content: center;
+    width:400px;
+}
+
+.text-container{
+    height: 150px;
+    overflow: auto;
+    text-overflow: ellipsis;
+}
+
+.text{
+    height: auto;
+}
+
+.hidden{
+    display:none;
+    height: 500px;
 }

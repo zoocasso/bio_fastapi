@@ -7,14 +7,18 @@
     <link href="https://unpkg.com/tabulator-tables@5.4.3/dist/css/tabulator_semanticui.min.css" rel="stylesheet">
 </head>
 <body>
-    <h1>Scientific Detail</h1>
+    <a href="/">go home</a>
+    <h1><a href ="/overview_page?bio_input={{bio_input}}">Overview</a> | Scientific Detail</h1>
     <h3>disease_trait_list : {{bio_input}}</h3>
-    <p><strong>summary</strong> : {{summary}}</p>
+    <div class="text-container">
+        <strong>summary</strong> : {{summary}}
+    </div>
     <p><strong>scientific detail</strong></p>
     <div id="scientific_detail"></div>
     <p><strong>reference</strong></p>
     <div id="reference"></div>
 
+    <script src="{{url_for('static',path='/js/pages.js')}}"></script>
     <script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
     <script>
     var scientific_detail = {{scientific_detail|tojson}};
