@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Oasis</title>
+    <link href="{{url_for('static',path='/style.css')}}" rel="stylesheet">
+    <link href="https://unpkg.com/tabulator-tables@5.4.3/dist/css/tabulator_semanticui.min.css" rel="stylesheet">
+</head>
+<body>
+    <p><strong>oasis_clinical</strong></p>
+    <div id="oasis_clinical"></div>
+    <p><strong>oasis_preclinical</strong></p>
+    <div id="oasis_preclinical"></div>
+    <p><strong>oasis_reference</strong></p>
+    <div id="oasis_reference"></div>
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
+    <script src="{{url_for('static',path='/js/script.js')}}"></script>
+    <script>
+        var oasis_clinical = {{oasis_clinical|tojson}};
+        var oasis_clinical_table = new Tabulator('#oasis_clinical',{
+            data:oasis_clinical,
+            pagination:"local",
+            paginationSize:10,
+            columns:[
+                {title:"tkm_key", field:"tkm_key", headerFilter:"input"},
+                {title:"tkm_kor", field:"tkm_kor", headerFilter:"input"},
+                {title:"tkm_chn", field:"tkm_chn", headerFilter:"input"},
+                {title:"tkm_eng", field:"tkm_eng", headerFilter:"input"},
+                {title:"category", field:"category", headerFilter:"input"},
+                {title:"target", field:"target", headerFilter:"input"},
+                {title:"patient_info", field:"patient_info", headerFilter:"input"},
+                {title:"intake_info", field:"intake_info", headerFilter:"input"},
+                {title:"effect", field:"effect", headerFilter:"input"},
+                {title:"concurrent_infusion", field:"concurrent_infusion", headerFilter:"input"},
+                {title:"ref_no", field:"ref_no", headerFilter:"input"},
+            ],
+        });
+
+        var oasis_preclinical = {{oasis_preclinical|tojson}};
+        var oasis_preclinical_table = new Tabulator('#oasis_preclinical',{
+            data:oasis_preclinical,
+            pagination:"local",
+            paginationSize:10,
+            columns:[
+                {title:"tkm_key", field:"tkm_key", headerFilter:"input"},
+                {title:"tkm_kor", field:"tkm_kor", headerFilter:"input"},
+                {title:"tkm_chn", field:"tkm_chn", headerFilter:"input"},
+                {title:"tkm_eng", field:"tkm_eng", headerFilter:"input"},
+                {title:"category", field:"category", headerFilter:"input"},
+                {title:"target", field:"target", headerFilter:"input"},
+                {title:"model_info_1", field:"model_info_1", headerFilter:"input"},
+                {title:"model_info_2", field:"model_info_2", headerFilter:"input"},
+                {title:"effect", field:"effect", headerFilter:"input"},
+                {title:"ref_no", field:"ref_no", headerFilter:"input"},
+            ],
+        });
+
+        var oasis_reference = {{oasis_reference|tojson}};
+        var oasis_reference_table = new Tabulator('#oasis_reference',{
+            data:oasis_reference,
+            pagination:"local",
+            paginationSize:10,
+            columns:[
+                {title:"tkm_key", field:"tkm_key", headerFilter:"input"},
+                {title:"약재명", field:"약재명", headerFilter:"input"},
+                {title:"No", field:"No", headerFilter:"input"},
+                {title:"참고문헌", field:"참고문헌", headerFilter:"input"},
+                {title:"url", field:"url", width:300, formatter:"link", formatterParams:{target:"_blank"}, headerFilter:"input"},
+            ],
+        });
+    </script>
+</body>
+</html>
