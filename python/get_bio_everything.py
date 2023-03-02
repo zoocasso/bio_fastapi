@@ -1,9 +1,10 @@
+import config
 import pymysql
 
-connection = pymysql.connect(host='211.34.105.108',
-                             user='root',
-                             password='vision9551',
-                             database='__bio_db',
+connection = pymysql.connect(host=config.DATABASE_CONFIG['host'],
+                             user=config.DATABASE_CONFIG['user'],
+                             password=config.DATABASE_CONFIG['password'],
+                             database=config.DATABASE_CONFIG['dbname'],
                              cursorclass=pymysql.cursors.DictCursor)
 cursor = connection.cursor()
 
