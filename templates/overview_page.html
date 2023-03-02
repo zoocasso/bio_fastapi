@@ -14,22 +14,20 @@
     <p><strong>snps_riskscore_1kgp</strong></p>
     <div id="snps_riskscore_1kgp"></div>
     <p><strong>medlineplus</strong> : {{medlineplus}}</p>
-    <p><strong>tkm</strong> : {{tkm}}</p>
+    <p><strong>tkm</strong></p>
+    <div id="tkm"></div>
     <p><strong>medicine</strong></p>
     <div id="medicine"></div>
-
+    
     <script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
     <script src="{{url_for('static',path='/js/script.js')}}"></script>
     <script>
         var snps_riskscore_1kgp = {{snps_riskscore_1kgp|tojson}};
-        var amz_table = new Tabulator('#snps_riskscore_1kgp',{
+        var snps_riskscore_1kgp_table = new Tabulator('#snps_riskscore_1kgp',{
             data:snps_riskscore_1kgp,
             pagination:"local",
             paginationSize:10,
             columns:[
-                // {formatter:"rowSelection", titleFormatter:"rowSelection", hozAlign:"center", 
-                // headerSort:false
-                // },
                 {title:"DISEASE_TRAIT", field:"DISEASE_TRAIT", headerFilter:"input"},
                 {title:"SNPS", field:"SNPS", headerFilter:"input"},
                 {title:"risk_score", field:"risk_score", headerFilter:"input"},
@@ -62,20 +60,61 @@
             ],
         });
 
-
-
-        var medicine = {{medicine|tojson}};
-        var amz_table = new Tabulator('#medicine',{
-            data:medicine,
+        var tkm = {{tkm|tojson}};
+        var tkm_table = new Tabulator('#tkm',{
+            data:tkm,
             pagination:"local",
             paginationSize:10,
             columns:[
                 // {formatter:"rowSelection", titleFormatter:"rowSelection", hozAlign:"center", 
                 // headerSort:false
                 // },
+                {title:"tkm_key", field:"tkm_key", headerFilter:"input"},
+                {title:"tkm_kor", field:"tkm_kor", headerFilter:"input"},
+                {title:"tkm_chn", field:"tkm_chn", headerFilter:"input"},
+                {title:"tkm_eng", field:"tkm_eng", headerFilter:"input"},
+            ],
+        });
+        tkm_table.on("rowClick",function(e,row){
+            window.location.href = '/oasis?tkm_key='+row._row.data.tkm_key;
+        });
+
+        var medicine = {{medicine|tojson}};
+        var medicine_table = new Tabulator('#medicine',{
+            data:medicine,
+            pagination:"local",
+            paginationSize:10,
+            columns:[
                 {title:"TKM_KEY", field:"TKM_KEY", headerFilter:"input"},
+                {title:"품목기준코드", field:"품목기준코드", headerFilter:"input"},
                 {title:"제품명", field:"제품명", headerFilter:"input"},
                 {title:"제품영문명", field:"제품영문명", headerFilter:"input"},
+                {title:"업체명", field:"업체명", headerFilter:"input"},
+                {title:"허가일", field:"허가일", headerFilter:"input"},
+                {title:"품목구분", field:"품목구분", headerFilter:"input"},
+                {title:"허가번호", field:"허가번호", headerFilter:"input"},
+                {title:"취소/취하", field:"취소/취하", headerFilter:"input"},
+                {title:"취소/취하일자", field:"취소/취하일자", headerFilter:"input"},
+                {title:"주성분", field:"주성분", headerFilter:"input"},
+                {title:"첨가제", field:"첨가제", headerFilter:"input"},
+                {title:"품목분류", field:"품목분류", headerFilter:"input"},
+                {title:"전문의약품", field:"전문의약품", headerFilter:"input"},
+                {title:"완제/원료", field:"완제/원료", headerFilter:"input"},
+                {title:"허가/신고", field:"허가/신고", headerFilter:"input"},
+                {title:"제조/수입", field:"제조/수입", headerFilter:"input"},
+                {title:"마약구분", field:"마약구분", headerFilter:"input"},
+                {title:"모양", field:"모양", headerFilter:"input"},
+                {title:"색상", field:"색상", headerFilter:"input"},
+                {title:"제형", field:"제형", headerFilter:"input"},
+                {title:"장축", field:"장축", headerFilter:"input"},
+                {title:"단축", field:"단축", headerFilter:"input"},
+                {title:"신약구분", field:"신약구분", headerFilter:"input"},
+                {title:"표준코드명", field:"표준코드명", headerFilter:"input"},
+                {title:"ATC코드", field:"ATC코드", headerFilter:"input"},
+                {title:"묶음의약품정보", field:"묶음의약품정보", headerFilter:"input"},
+                {title:"e은약요", field:"e은약요", headerFilter:"input"},
+                {title:"수입제조국", field:"수입제조국", headerFilter:"input"},
+                {title:"주성분영문", field:"주성분영문", headerFilter:"input"},
             ],
         });
     </script>

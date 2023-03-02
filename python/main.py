@@ -11,7 +11,7 @@ from pathlib import Path
 app = FastAPI()
 
 ## static 폴더 mounting작업
-app.mount("/static",StaticFiles(directory=Path(__file__).parent.parent.absolute() / "static"),name="static",)
+app.mount("/static",StaticFiles(directory=Path(__file__).parent.parent.absolute() / "static"),name="static")
 
 ## 템플릿 구성을 위해 Jinja2 활용
 templates = Jinja2Templates(directory="templates")
@@ -38,5 +38,9 @@ async def root(request:Request, bio_input:str):
     reference = get_bio_everything.get_reference(bio_input)
     return templates.TemplateResponse("scientific_detail_page.html", {"request":request, "bio_input":bio_input, "summary":summary, "scientific_detail":scientific_detail,"reference":reference})
 
+@app.get("/oasis")
+async def root(request:Request, tkm_key:str):
+    oasis_clinical, oasis_preclinical, oasis_reference = get_bio_everything.get_oasis(tkm_key)
+    return templates.TemplateResponse("oasis.html", {"request":request, "oasis_clinical":oasis_clinical, "oasis_preclinical":oasis_preclinical, "oasis_reference":oasis_reference})
 
-uvicorn.run(app, host = '127.0.0.1', port = 8000)
+uvicorn.run(app, host = '0.0.0.0', port = 8000)
