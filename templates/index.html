@@ -15,23 +15,23 @@
     <form action="/disease_trait">
         <input type="submit" value="SRR062634">
     </form>
-</body>
-<script>
-    const upload_btn = document.querySelector("#upload_btn")
-    const upload_file = document.querySelector("#upload_file")
-    function click_upload_btn(e){
-        e.preventDefault()
-                
-        var formdata = new FormData();
-        formdata.append('file', upload_file.files[0])
+    <script>
+        const upload_btn = document.querySelector("#upload_btn")
+        const upload_file = document.querySelector("#upload_file")
+        function click_upload_btn(e){
+            e.preventDefault()
+            
+            var formdata = new FormData();
+            formdata.append('file', upload_file.files[0])
 
-        fetch('/uploadfile/',{
-            method:'POST',
-            body:formdata,
-        })
-        .then((response) => response.json())
-        .then(data => console.log(data))
-    };
-    upload_btn.addEventListener("click",click_upload_btn)
-</script>
+            fetch('/uploadfile/',{
+                method:'POST',
+                body:formdata,
+            })
+            .then((response) => console.log(response.json()))
+            .then(data => console.log(data))
+        };
+        upload_btn.addEventListener("click",click_upload_btn)
+    </script>
+</body>
 </html>
