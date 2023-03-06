@@ -1,7 +1,9 @@
 import get_bio_everything
+import vcf_annotation.annotation
 
+import os
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, File, UploadFile
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
@@ -16,11 +18,25 @@ app.mount("/static",StaticFiles(directory=Path(__file__).parent.parent.absolute(
 ## 템플릿 구성을 위해 Jinja2 활용
 templates = Jinja2Templates(directory="templates")
 
-## 메인페이지
+@app.post('/uploadfile/')
+async def create_file(request: Request, file: UploadFile):
+    UPLOAD_DIRECTORY = "./input_data"
+    contents = await file.read()
+    with open(os.path.join(UPLOAD_DIRECTORY, file.filename), "wb") as f:
+        f.write(contents)
+    vcf_annotation.annotation.vcf_annotation("./input_data/"+file.filename)
+    return templates.TemplateResponse("a.html", {"request":request})
+
+# 메인페이지
 @app.get("/")
 async def root(request:Request):
+    return templates.TemplateResponse("index.html", {"request":request})
+
+@app.get("/disease_trait")
+# @app.get("/")
+async def root(request:Request):
     disease_trait = get_bio_everything.get_disease_trait()
-    return templates.TemplateResponse("index.html", {"request":request, "disease_trait":disease_trait})
+    return templates.TemplateResponse("disease_trait.html", {"request":request, "disease_trait":disease_trait})
 
 @app.get("/overview_page")
 async def root(request:Request, bio_input:str):
