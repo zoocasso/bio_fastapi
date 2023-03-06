@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BIO WEB</title>
+    <link href="{{url_for('static',path='/style.css')}}" rel="stylesheet">
+    <link href="https://unpkg.com/tabulator-tables@5.4.3/dist/css/tabulator_semanticui.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id = "index_div">
+        <div id="disease_trait"></div>
+        <div id="search_div">
+            <h1>BIO WEB</h1>
+            <form id="form" action="/overview_page" method="get">
+                <h3>Overview</h3>
+                <input type="text" name="bio_input">
+                <input type="submit" value="검색">
+            </form>
+            <form id="form" action="/scientific_detail_page" method="get">
+                <h3>Scientific Detail</h3>
+                <input type="text" name="bio_input">
+                <input type="submit" value="검색">
+            </form>
+        </div>
+    </div>
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
+    <script  src="{{url_for('static',path='/js/script.js')}}"></script>
+    <script>
+        var disease_trait = {{disease_trait|tojson}};
+        var disease_trait_table = new Tabulator('#disease_trait',{
+            data:disease_trait,
+            pagination:"local",
+            paginationSize:15,
+            columns:[
+                // {formatter:"rowSelection", titleFormatter:"rowSelection", hozAlign:"center", 
+                // headerSort:false
+                // },
+                {title:"DISEASE_TRAIT", field:"DISEASE_TRAIT", headerFilter:"input"},
+            ],
+        });
+        disease_trait_table.on("rowClick",function(e,row){
+            window.location.href = '/overview_page?bio_input='+row._row.data.DISEASE_TRAIT;
+        });
+    </script>
+</body>
+</html>
