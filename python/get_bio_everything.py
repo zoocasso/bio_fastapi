@@ -19,7 +19,7 @@ def get_summary(bio_input):
     return rows
 
 def get_snps_riskscore_1kgp(bio_input):
-    cursor.execute(f'SELECT DISEASE_TRAIT, SNPS, risk_score,GBR,FIN,CHS,PUR,CDX,CLM,IBS,PEL,PJL,KHV,ACB,GWD,ESN,BEB,MSL,STU,ITU,CEU,YRI,CHB,JPT,LWK,ASW,MXL,TSI,GIH FROM connect_vcf_dbsnp_gwas_1kgp_uniprot WHERE DISEASE_TRAIT = "{bio_input}";')
+    cursor.execute(f'SELECT DISEASE_TRAIT, SNPS, risk_score,risk_level,CI,GBR,FIN,CHS,PUR,CDX,CLM,IBS,PEL,PJL,KHV,ACB,GWD,ESN,BEB,MSL,STU,ITU,CEU,YRI,CHB,JPT,LWK,ASW,MXL,TSI,GIH FROM connect_vcf_dbsnp_gwas_1kgp_uniprot WHERE DISEASE_TRAIT = "{bio_input}";')
     rows = cursor.fetchall()
     return rows
 
