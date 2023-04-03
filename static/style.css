@@ -2,6 +2,10 @@
     width:400px;
 }
 
+#igsr{
+    width:600px;
+}
+
 #index_div{
     height: 90vh;
     display: flex;
@@ -31,4 +35,27 @@
 .hidden{
     display:none;
     height: 500px;
+}
+
+#user_div{
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 350px;
+    height: 150px;
+    border : 1px solid black;
+}
+
+.user_form{
+    padding:5px;
+}
+
+#upload_div{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border : 1px solid black;
+    width: 350px;
+    height: 50px;
 }

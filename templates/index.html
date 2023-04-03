@@ -4,17 +4,28 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload vcf</title>
+    <link href="{{url_for('static',path='/style.css')}}" rel="stylesheet">
+    <title>Upload & Select User</title>
 </head>
 <body>
-    <h1>Upload vcf file</h1>
-    <form id="upload_form" enctype="multipart/form-data">
-        <input id="upload_file" type="file">
-        <input id="upload_btn" type="submit">
-    </form>
-    <form action="/disease_trait">
-        <input type="submit" value="SRR062634">
-    </form>
+    <h1>Upload vcf & Select User</h1>
+    <h3>Upload vcf file (업로드 기능 추가 예정)</h3>
+    <div id ='upload_div'>
+        <form enctype="multipart/form-data">
+            <input id="upload_file" type="file" disabled>
+            <input id="upload_btn" type="submit" disabled>
+        </form>
+    </div>
+
+    <h3>User List (click button)</h3>
+    <div id ='user_div'>
+        <form class="user_form" action="/disease_trait">
+            <input type="submit" name="user" value="SRR062634">
+        </form>
+        <form class="user_form" action="/disease_trait">
+            <input type="submit" name="user" value="petra">
+        </form>
+    </div>
     <script>
         const upload_btn = document.querySelector("#upload_btn")
         const upload_file = document.querySelector("#upload_file")

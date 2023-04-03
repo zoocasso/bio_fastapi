@@ -8,14 +8,14 @@
 </head>
 <body>
     <a href="/">go home</a>
-    <h1>Overview | <a href ="/scientific_detail_page?bio_input={{bio_input}}">Scientific Detail</a></h1>
+    <h1>Overview | <a href ="/scientific_detail_page?bio_input={{bio_input}}&&user={{user}}">Scientific Detail</a></h1>
     
     <h3>disease_trait_list : {{bio_input}}</h3>
     <div class="text-container">
         <strong>summary</strong> : {{summary}}
     </div>
     <h3>we found {{snps_cnt}} of your genetic variants related with {{bio_input}}</h3>
-    <p><strong>snps_riskscore_1kgp</strong></p>
+    <p><strong>snps_riskscore_1kgp (click row)</strong></p>
     <div id="snps_riskscore_1kgp"></div>
     <p><strong>medlineplus</strong> : {{medlineplus}}</p>
     <p><strong>tkm (click row)</strong></p>
@@ -26,6 +26,9 @@
     <script src="{{url_for('static',path='/js/pages.js')}}"></script>
     <script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
     <script>
+        var sch = location.search
+        var params = new URLSearchParams(sch);
+
         var snps_riskscore_1kgp = {{snps_riskscore_1kgp|tojson}};
         var snps_riskscore_1kgp_table = new Tabulator('#snps_riskscore_1kgp',{
             data:snps_riskscore_1kgp,
@@ -37,33 +40,11 @@
                 {title:"risk_score", field:"risk_score"},
                 {title:"risk_level", field:"risk_level"},
                 {title:"CI", field:"CI"},
-                {title:"GBR", field:"GBR"},
-                {title:"FIN", field:"FIN"},
-                {title:"CHS", field:"CHS"},
-                {title:"PUR", field:"PUR"},
-                {title:"CDX", field:"CDX"},
-                {title:"CLM", field:"CLM"},
-                {title:"IBS", field:"IBS"},
-                {title:"PEL", field:"PEL"},
-                {title:"PJL", field:"PJL"},
-                {title:"KHV", field:"KHV"},
-                {title:"ACB", field:"ACB"},
-                {title:"GWD", field:"GWD"},
-                {title:"ESN", field:"ESN"},
-                {title:"BEB", field:"BEB"},
-                {title:"MSL", field:"MSL"},
-                {title:"STU", field:"STU"},
-                {title:"ITU", field:"ITU"},
-                {title:"CEU", field:"CEU"},
-                {title:"YRI", field:"YRI"},
-                {title:"CHB", field:"CHB"},
-                {title:"JPT", field:"JPT"},
-                {title:"LWK", field:"LWK"},
-                {title:"ASW", field:"ASW"},
-                {title:"MXL", field:"MXL"},
-                {title:"TSI", field:"TSI"},
-                {title:"GIH", field:"GIH"},
+                {title:"risk_type", field:"risk_type"},
             ],
+        });
+        snps_riskscore_1kgp_table.on("rowClick",function(e,row){
+            window.location.href = '/igsr?snps='+row._row.data.SNPS+'&&user='+params.get('user');
         });
 
         var tkm = {{tkm|tojson}};
