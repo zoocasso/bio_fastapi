@@ -8,7 +8,7 @@
 </head>
 <body>
     <a href="/">go home</a>
-    <h1><a href ="/overview_page?bio_input={{bio_input}}">Overview</a> | Scientific Detail</h1>
+    <h1><a href ="/overview_page?bio_input={{bio_input}}&&user={{user}}">Overview</a> | Scientific Detail</h1>
     <h3>disease_trait_list : {{bio_input}}</h3>
     <div class="text-container">
         <strong>summary</strong> : {{summary}}
@@ -31,15 +31,19 @@
             // headerSort:false
             // },
             {title:"DISEASE_TRAIT", field:"DISEASE_TRAIT"},
-            {title:"VARIANT AA CHANGE", field:"VARIANT AA CHANGE"},
             {title:"SNPS", field:"SNPS"},
+            {title:"VARIANT AA CHANGE", field:"VARIANT AA CHANGE"},
             {title:"GENENAME", field:"GENENAME"},
-            {title:"CONTEXT", field:"CONTEXT"},
+            {title:"var_type", field:"var_type"},
             {title:"EFFECT_ALLELE", field:"EFFECT_ALLELE"},
             {title:"ALLELE_1", field:"ALLELE_1"},
             {title:"ALLELE_2", field:"ALLELE_2"},
         ],
     });
+    scientific_detail_table.on("rowClick",function(e,row){
+        window.location.href = '/ncbi?genename='+row._row.data.GENENAME;
+    });
+
     var reference = {{reference|tojson}};
     var reference_table = new Tabulator('#reference',{
         data:reference,

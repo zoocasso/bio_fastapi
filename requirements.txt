@@ -1,0 +1,8 @@
+Jinja2==3.1.2
+tqdm==4.64.1
+pandas==1.5.2
+PyMySQL==1.0.2
+uvicorn==0.20.0
+fastapi==0.88.0
+SQLAlchemy==1.4.45
+pydantic==1.10.4

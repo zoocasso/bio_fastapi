@@ -1,5 +1,5 @@
-import get_bio_everything
-# import vcf_annotation.annotation
+from . import get_bio_everything
+# from vcf_annotation import annotation
 
 import os
 import uvicorn
@@ -24,40 +24,51 @@ templates = Jinja2Templates(directory="templates")
 #     contents = await file.read()
 #     with open(os.path.join(UPLOAD_DIRECTORY, file.filename), "wb") as f:
 #         f.write(contents)
-#     vcf_annotation.annotation.vcf_annotation("./input_data/"+file.filename)
+#     annotation.vcf_annotation("./input_data/"+file.filename)
 #     return "uploaded vcf file"
 
-# # 메인페이지
-# @app.get("/")
-# async def root(request:Request):
-#     return templates.TemplateResponse("index.html", {"request":request})
-
-# @app.get("/disease_trait")
+# 메인페이지
 @app.get("/")
 async def root(request:Request):
-    disease_trait = get_bio_everything.get_disease_trait()
-    return templates.TemplateResponse("disease_trait.html", {"request":request, "disease_trait":disease_trait})
+    return templates.TemplateResponse("index.html", {"request":request})
+
+@app.get("/disease_trait")
+# @app.get("/")
+async def root(request:Request, user:str):
+    disease_trait = get_bio_everything.get_disease_trait(user)
+    return templates.TemplateResponse("disease_trait.html", {"request":request, "disease_trait":disease_trait, "user":user})
 
 @app.get("/overview_page")
-async def overview_page(request:Request, bio_input:str):
+async def overview_page(request:Request, bio_input:str, user:str):
     summary = get_bio_everything.get_summary(bio_input)
-    snps_riskscore_1kgp = get_bio_everything.get_snps_riskscore_1kgp(bio_input)
-    snps_cnt = get_bio_everything.get_count_snps(bio_input)
+    snps_riskscore_1kgp = get_bio_everything.get_snps_riskscore_1kgp(bio_input,user)
+    snps_cnt = get_bio_everything.get_count_snps(bio_input,user)[0]['count(distinct SNPS)']
     medlineplus = get_bio_everything.get_medlineplus(bio_input)
     tkm = get_bio_everything.get_tkm(bio_input)
     medicine = get_bio_everything.get_medicine(tkm)
-    return templates.TemplateResponse("overview_page.html", {"request":request, "bio_input":bio_input, "summary":summary, "snps_cnt":snps_cnt, "snps_riskscore_1kgp":snps_riskscore_1kgp, "medlineplus":medlineplus, "tkm":tkm, "medicine":medicine})
+    return templates.TemplateResponse("overview_page.html", {"request":request, "bio_input":bio_input, "summary":summary, "snps_cnt":snps_cnt, "snps_riskscore_1kgp":snps_riskscore_1kgp, "medlineplus":medlineplus, "tkm":tkm, "medicine":medicine, "user":user})
 
 @app.get("/scientific_detail_page")
-async def scientific_detail_page(request:Request, bio_input:str):
-    summary = get_bio_everything.get_summary(bio_input)
-    scientific_detail = get_bio_everything.get_scientific_detail(bio_input)
-    reference = get_bio_everything.get_reference(bio_input)
-    return templates.TemplateResponse("scientific_detail_page.html", {"request":request, "bio_input":bio_input, "summary":summary, "scientific_detail":scientific_detail,"reference":reference})
+async def scientific_detail_page(request:Request, bio_input:str, user:str):
+    summary = get_bio_everything.get_summary(bio_input,user)
+    scientific_detail = get_bio_everything.get_scientific_detail(bio_input,user)
+    reference = get_bio_everything.get_reference(bio_input,user)
+    return templates.TemplateResponse("scientific_detail_page.html", {"request":request, "bio_input":bio_input, "summary":summary, "scientific_detail":scientific_detail,"reference":reference, "user":user})
 
 @app.get("/oasis")
 async def oasis(request:Request, tkm_key:str):
     oasis_clinical, oasis_preclinical, oasis_reference = get_bio_everything.get_oasis(tkm_key)
     return templates.TemplateResponse("oasis.html", {"request":request, "oasis_clinical":oasis_clinical, "oasis_preclinical":oasis_preclinical, "oasis_reference":oasis_reference})
 
-uvicorn.run(app, host = '0.0.0.0', port = 8000)
+@app.get("/igsr")
+async def igsr(request:Request, snps:str, user:str):
+    igsr = get_bio_everything.get_igsr(snps,user)
+    return templates.TemplateResponse("igsr.html", {"request":request, "igsr":igsr})
+
+@app.get("/ncbi")
+async def igsr(request:Request, genename:str):
+    ncbi_gene = get_bio_everything.get_ncbi(genename)
+    return templates.TemplateResponse("ncbi.html", {"request":request, "ncbi_gene":ncbi_gene})
+
+if __name__ == "__main__":
+    uvicorn.run(app, host = '0.0.0.0', port = 8000)

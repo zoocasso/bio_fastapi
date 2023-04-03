@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ncbi</title>
+    <link href="{{url_for('static',path='/style.css')}}" rel="stylesheet">
+    <link href="https://unpkg.com/tabulator-tables@5.4.3/dist/css/tabulator_semanticui.min.css" rel="stylesheet">
+</head>
+<body>
+    <p><strong>NCBI Gene Summary</strong></p>
+    <p>{{ncbi_gene}}</p>
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
+    <script src="{{url_for('static',path='/js/script.js')}}"></script>
+</body>
+</html>

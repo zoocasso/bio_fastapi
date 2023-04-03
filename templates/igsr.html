@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IGSR</title>
+    <link href="{{url_for('static',path='/style.css')}}" rel="stylesheet">
+    <link href="https://unpkg.com/tabulator-tables@5.4.3/dist/css/tabulator_semanticui.min.css" rel="stylesheet">
+</head>
+<body>
+    <p><strong>international genome sample resource</strong></p>
+    <div id="igsr"></div>
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
+    <script src="{{url_for('static',path='/js/script.js')}}"></script>
+    <script>
+        var igsr = {{igsr|tojson}};
+        console.log(igsr)
+        var igsr_table = new Tabulator('#igsr',{
+            data:igsr,
+            pagination:"local",
+            paginationSize:13,
+            columns:[
+                {title:"population", field:"key"},
+                {title:"ratio [%]", field:"value"},
+                {title:"superpopulation", field:"superpopulation"},
+                {title:"pop_name", field:"pop_name"},
+            ],
+        });
+    </script>
+</body>
+</html>
