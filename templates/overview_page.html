@@ -17,7 +17,8 @@
     <h3>we found {{snps_cnt}} of your genetic variants related with {{bio_input}}</h3>
     <p><strong>snps_riskscore_1kgp (click row)</strong></p>
     <div id="snps_riskscore_1kgp"></div>
-    <p><strong>medlineplus</strong> : {{medlineplus}}</p>
+    <p><strong>medlineplus</strong>
+    <div id="medlineplus"></div>
     <p><strong>tkm (click row)</strong></p>
     <div id="tkm"></div>
     <p><strong>medicine</strong></p>
@@ -46,6 +47,22 @@
         snps_riskscore_1kgp_table.on("rowClick",function(e,row){
             window.location.href = '/igsr?snps='+row._row.data.SNPS+'&&user='+params.get('user');
         });
+
+        var medlineplus = {{medlineplus|tojson}};
+        var medlineplus_table = new Tabulator('#medlineplus',{
+            data:medlineplus,
+            pagination:"local",
+            paginationSize:10,
+            columns:[
+                {title:"section", field:"title"},
+                {title:"title", field:"link_title"},
+                {title:"link", field:"link", formatter:"link", formatterParams:{target:"_blank"}},
+            ],
+        });
+
+        // for (i=0; i<medlineplus.length; i++){
+        //     console.log(medlineplus[i])
+        // }
 
         var tkm = {{tkm|tojson}};
         var tkm_table = new Tabulator('#tkm',{
