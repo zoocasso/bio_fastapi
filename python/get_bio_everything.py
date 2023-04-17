@@ -3,6 +3,7 @@ from . import config
 import pymysql
 import json
 import math
+import ast
 
 class pymysql_class:
     def db_connect(self):
@@ -50,12 +51,23 @@ def get_count_snps(bio_input,user):
     return rows
 
 def get_medlineplus(bio_input):
+    
     db_session = pymysql_class()
     cursor = db_session.db_connect()
-    cursor.execute(f'SELECT title,content FROM medlineplus WHERE topic_name ="{bio_input}" AND (title = "Diagnosis and Tests" OR title = "Treatments and Therapies");')
+    cursor.execute(f'SELECT title,link_title,link FROM medlineplus WHERE topic_name ="{bio_input}" AND (title = "Diagnosis and Tests" OR title = "Treatments and Therapies");')
     rows = cursor.fetchall()
+    temp_list = list()
+    for i in rows:
+        link_title_list = ast.literal_eval(i['link_title'])
+        link_list = ast.literal_eval(i['link'])
+        for j in range(len(link_title_list)):
+            temp_dict = dict()
+            temp_dict['title'] = i['title']
+            temp_dict['link_title'] = link_title_list[j]
+            temp_dict['link'] = link_list[j]
+            temp_list.append(temp_dict)
     db_session.db_close()
-    return rows
+    return temp_list
 
 def get_tkm(bio_input):
     try:

@@ -50,7 +50,7 @@ async def overview_page(request:Request, bio_input:str, user:str):
 
 @app.get("/scientific_detail_page")
 async def scientific_detail_page(request:Request, bio_input:str, user:str):
-    summary = get_bio_everything.get_summary(bio_input,user)
+    summary = get_bio_everything.get_summary(bio_input)
     scientific_detail = get_bio_everything.get_scientific_detail(bio_input,user)
     reference = get_bio_everything.get_reference(bio_input,user)
     return templates.TemplateResponse("scientific_detail_page.html", {"request":request, "bio_input":bio_input, "summary":summary, "scientific_detail":scientific_detail,"reference":reference, "user":user})
@@ -67,8 +67,12 @@ async def igsr(request:Request, snps:str, user:str):
 
 @app.get("/ncbi")
 async def igsr(request:Request, genename:str):
-    ncbi_gene = get_bio_everything.get_ncbi(genename)
-    return templates.TemplateResponse("ncbi.html", {"request":request, "ncbi_gene":ncbi_gene})
+    try:
+        ncbi_gene = get_bio_everything.get_ncbi(genename)
+        print(ncbi_gene)
+        return templates.TemplateResponse("ncbi.html", {"request":request, "ncbi_gene":ncbi_gene})
+    except:
+        return f'genename is not exist'
 
 if __name__ == "__main__":
-    uvicorn.run(app, host = '0.0.0.0', port = 8000)
+    uvicorn.run(app, host = '127.0.0.1', port = 8000)
