@@ -5,15 +5,21 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="{{url_for('static',path='/style.css')}}" rel="stylesheet">
-    <title>Upload & Select User</title>
+    <title>GeneLinks_report</title>
 </head>
 <body>
-    <h1>Upload vcf & Select User</h1>
-    <h3>Upload vcf file (업로드 기능 추가 예정)</h3>
-    <div id ='upload_div'>
+    <h3>Upload vcf file</h3>
+    <div class='upload_div'>
         <form enctype="multipart/form-data">
-            <input id="upload_file" type="file" disabled>
-            <input id="upload_btn" type="submit" disabled>
+            <input id="upload_vcf_file" type="file">
+            <input id="upload_vcf_btn" type="submit">
+        </form>
+    </div>
+    <h3>Upload array file</h3>
+    <div class='upload_div'>
+        <form enctype="multipart/form-data">
+            <input id="upload_array_file" type="file">
+            <input id="upload_array_btn" type="submit">
         </form>
     </div>
 
@@ -27,13 +33,13 @@
         </form>
     </div>
     <script>
-        const upload_btn = document.querySelector("#upload_btn")
-        const upload_file = document.querySelector("#upload_file")
-        function click_upload_btn(e){
+        const upload_vcf_btn = document.querySelector("#upload_vcf_btn")
+        const upload_vcf_file = document.querySelector("#upload_vcf_file")
+        function click_upload_vcf_btn(e){
             e.preventDefault()
             
             var formdata = new FormData();
-            formdata.append('file', upload_file.files[0])
+            formdata.append('file', upload_vcf_file.files[0])
 
             fetch('/uploadfile/',{
                 method:'POST',
@@ -42,7 +48,24 @@
             .then((response) => console.log(response.json()))
             .then(data => console.log(data))
         };
-        upload_btn.addEventListener("click",click_upload_btn)
+        upload_vcf_btn.addEventListener("click",click_upload_vcf_btn)
+
+        const upload_array_btn = document.querySelector("#upload_array_btn")
+        const upload_array_file = document.querySelector("#upload_array_file")
+        function click_upload_array_btn(e){
+            e.preventDefault()
+            
+            var formdata = new FormData();
+            formdata.append('file', upload_array_file.files[0])
+
+            fetch('/uploadfile/array/',{
+                method:'POST',
+                body:formdata,
+            })
+            .then((response) => console.log(response.json()))
+            .then(data => console.log(data))
+        };
+        upload_array_btn.addEventListener("click",click_upload_array_btn)
     </script>
 </body>
 </html>

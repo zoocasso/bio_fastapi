@@ -51,10 +51,11 @@
     padding:5px;
 }
 
-#upload_div{
+.upload_div{
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: center;    
+    text-align: center;
     border : 1px solid black;
     width: 350px;
     height: 50px;
