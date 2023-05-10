@@ -1,4 +1,5 @@
 import vcf_annotation.pyvcf_221017 as pyvcf
+import config
 
 from sqlalchemy import create_engine
 import pymysql
@@ -23,14 +24,17 @@ def vcf_counter(object):
 
 def vcf_annotation(vcf_file):
     start = time.time()
-
-    db_connection_str = 'mysql+pymysql://root:vision9551@211.34.105.108/__bio_db'
+    
+    db_connection_str = f"mysql+pymysql://{config.DATABASE_CONFIG['user']}:{config.DATABASE_CONFIG['password']}@{config.DATABASE_CONFIG['host']}/{config.DATABASE_CONFIG['dbname']}"
     db_connection = create_engine(db_connection_str)
     conn = db_connection.connect()
 
-    mydb = pymysql.connect(host="211.34.105.108",user="root",passwd="vision9551",db="__bio_db",charset='utf8')
+    mydb = pymysql.connect(host=config.DATABASE_CONFIG['host'],
+                                user=config.DATABASE_CONFIG['user'],
+                                password=config.DATABASE_CONFIG['password'],
+                                database=config.DATABASE_CONFIG['dbname'],
+                                cursorclass=pymysql.cursors.DictCursor)
     cursor = mydb.cursor()
-    
     vcf_start = time.time()
 
     vcf_reader = pyvcf.Reader(open(vcf_file, 'r'))
@@ -89,7 +93,7 @@ def vcf_annotation(vcf_file):
 
     dbsnp_start = time.time()
     print('connect_dbsnp')
-    connect_dbsnp_sql = open('./python/vcf_annotation/connect_dbsnp.sql').read()
+    connect_dbsnp_sql = open('./app/vcf_annotation/connect_dbsnp.sql', 'r', encoding='utf-8').read()
     connect_dbsnp_sql_list = connect_dbsnp_sql.split(';\n')
     for i in tqdm(connect_dbsnp_sql_list):
         cursor.execute(i)
@@ -101,7 +105,7 @@ def vcf_annotation(vcf_file):
 
     gwas_start = time.time()
     print('connect_gwas')
-    connect_gwas_sql = open('./python/vcf_annotation/connect_gwas.sql').read()
+    connect_gwas_sql = open('./app/vcf_annotation/connect_gwas.sql', 'r', encoding='utf-8').read()
     connect_gwas_sql_list = connect_gwas_sql.split(';\n')
     for i in tqdm(connect_gwas_sql_list):
         cursor.execute(i)
@@ -114,7 +118,7 @@ def vcf_annotation(vcf_file):
 
     akgp_start = time.time()
     print('connect_1kgp')
-    connect_1kgp_sql = open('./python/vcf_annotation/connect_1kgp.sql').read()
+    connect_1kgp_sql = open('./app/vcf_annotation/connect_1kgp.sql', 'r', encoding='utf-8').read()
     connect_1kgp_sql_list = connect_1kgp_sql.split(';\n')
     for i in tqdm(connect_1kgp_sql_list):
         cursor.execute(i)
@@ -127,7 +131,7 @@ def vcf_annotation(vcf_file):
 
     uniprot_start = time.time()
     print('connect_uniprot')
-    connect_uniprot_sql = open('./python/vcf_annotation/connect_uniprot.sql').read()
+    connect_uniprot_sql = open('./app/vcf_annotation/connect_uniprot.sql', 'r', encoding='utf-8').read()
     connect_uniprot_sql_list = connect_uniprot_sql.split(';\n')
     for i in tqdm(connect_uniprot_sql_list):
         cursor.execute(i)
@@ -135,6 +139,6 @@ def vcf_annotation(vcf_file):
     uniprot_end = time.time()
     print(f"connect_uniprot : {uniprot_end - uniprot_start:.5f} sec")
 
-
+    cursor.execute(f'rename table connect_vcf_dbsnp_gwas_1kgp_uniprot to {vcf_file}')
     end = time.time()
     print(f"total time : {end - start:.5f} sec")
