@@ -4,13 +4,30 @@ from array_annotation import array_annotation
 
 import os
 import uvicorn
+from pathlib import Path
 from fastapi import FastAPI, Request, File, UploadFile
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pathlib import Path
+from fastapi.middleware.cors import CORSMiddleware
+
 
 ## fastapi 인스턴스 저장
 app = FastAPI()
+
+## CORS
+origins = [
+    "http://localhost:8080",
+    "http://localhost:3000",
+    # "*",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 ## static 폴더 mounting작업
 app.mount("/static",StaticFiles(directory=Path(__file__).absolute().parent.parent.absolute() / "static"),name="static")
