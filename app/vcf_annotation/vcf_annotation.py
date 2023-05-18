@@ -1,5 +1,5 @@
-import vcf_annotation.pyvcf_221017 as pyvcf
-import config
+import app.vcf_annotation.pyvcf_221017 as pyvcf
+from app import config
 
 from sqlalchemy import create_engine
 import pymysql

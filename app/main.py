@@ -1,6 +1,6 @@
-import get_bio_everything
-from vcf_annotation import vcf_annotation
-from array_annotation import array_annotation
+from app import get_bio_everything
+from app.vcf_annotation import vcf_annotation
+from app.array_annotation import array_annotation
 
 import os
 import uvicorn
