@@ -1,4 +1,4 @@
-import config
+from app import config
 
 import pymysql
 import json

@@ -21,8 +21,8 @@ try:
 except ImportError:
     cparse = None
 
-from vcf_annotation.model_221017 import _Call, _Record, make_calldata_tuple
-from vcf_annotation.model_221017 import _Substitution, _Breakend, _SingleBreakend, _SV
+from app.vcf_annotation.model_221017 import _Call, _Record, make_calldata_tuple
+from app.vcf_annotation.model_221017 import _Substitution, _Breakend, _SingleBreakend, _SV
 
 
 # Metadata parsers/constants
