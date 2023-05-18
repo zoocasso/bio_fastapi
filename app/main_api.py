@@ -1,6 +1,6 @@
-import get_bio_everything
-from vcf_annotation import vcf_annotation
-from array_annotation import array_annotation
+from app import get_bio_everything
+from app.vcf_annotation import vcf_annotation
+from app.array_annotation import array_annotation
 
 import os
 import uvicorn
@@ -16,9 +16,7 @@ app = FastAPI()
 
 ## CORS
 origins = [
-    "http://localhost:8080",
-    "http://localhost:3000",
-    # "*",
+    "*",
 ]
 
 app.add_middleware(
@@ -62,7 +60,11 @@ async def root(request:Request):
 # @app.get("/")
 async def root(request:Request, user:str):
     disease_trait = get_bio_everything.get_disease_trait(user)
-    return templates.TemplateResponse("disease_trait.html", {"request":request, "disease_trait":disease_trait, "user":user})
+    
+    res_json = dict()
+    res_json['disease_trait'] = disease_trait
+    res_json['user'] = user
+    return res_json
 
 @app.get("/overview_page")
 async def overview_page(request:Request, bio_input:str, user:str):
@@ -72,31 +74,64 @@ async def overview_page(request:Request, bio_input:str, user:str):
     medlineplus = get_bio_everything.get_medlineplus(bio_input)
     tkm = get_bio_everything.get_tkm(bio_input)
     medicine = get_bio_everything.get_medicine(tkm)
-    return templates.TemplateResponse("overview_page.html", {"request":request, "bio_input":bio_input, "summary":summary, "snps_cnt":snps_cnt, "snps_riskscore_1kgp":snps_riskscore_1kgp, "medlineplus":medlineplus, "tkm":tkm, "medicine":medicine, "user":user})
+
+    res_json = dict()
+    res_json['bio_input'] = bio_input
+    res_json['summary'] = summary
+    res_json['snps_cnt'] = snps_cnt
+    res_json['snps_riskscore_1kgp'] = snps_riskscore_1kgp
+    res_json['medlineplus'] = medlineplus
+    res_json['tkm'] = tkm
+    res_json['medicine'] = medicine
+    res_json['user'] = user
+
+    return res_json
 
 @app.get("/scientific_detail_page")
 async def scientific_detail_page(request:Request, bio_input:str, user:str):
     summary = get_bio_everything.get_summary(bio_input)
     scientific_detail = get_bio_everything.get_scientific_detail(bio_input,user)
     reference = get_bio_everything.get_reference(bio_input,user)
-    return templates.TemplateResponse("scientific_detail_page.html", {"request":request, "bio_input":bio_input, "summary":summary, "scientific_detail":scientific_detail,"reference":reference, "user":user})
+
+    res_json = dict()
+    res_json['bio_input'] = bio_input
+    res_json['summary'] = summary
+    res_json['scientific_detail'] = scientific_detail
+    res_json['reference'] = reference
+    res_json['user'] = user
+
+    return res_json
 
 @app.get("/igsr")
 async def igsr(request:Request, snps:str, user:str):
     igsr = get_bio_everything.get_igsr(snps,user)
-    return templates.TemplateResponse("igsr.html", {"request":request, "igsr":igsr})
+
+    res_json = dict()
+    res_json['igsr'] = igsr
+
+    return res_json
 
 @app.get("/oasis")
 async def oasis(request:Request, tkm_key:str):
     oasis_clinical, oasis_preclinical, oasis_reference = get_bio_everything.get_oasis(tkm_key)
-    return templates.TemplateResponse("oasis.html", {"request":request, "oasis_clinical":oasis_clinical, "oasis_preclinical":oasis_preclinical, "oasis_reference":oasis_reference})
+
+    res_json = dict()
+    res_json['oasis_clinical'] = oasis_clinical
+    res_json['oasis_preclinical'] = oasis_preclinical
+    res_json['oasis_reference'] = oasis_reference
+
+    return res_json
 
 
 @app.get("/ncbi")
 async def igsr(request:Request, genename:str):
     try:
         ncbi_gene = get_bio_everything.get_ncbi(genename)
-        return templates.TemplateResponse("ncbi.html", {"request":request, "ncbi_gene":ncbi_gene})
+
+        res_json = dict()
+        res_json['ncbi_gene'] = ncbi_gene
+
+        return res_json
     except:
         return f'genename is not exist'
 
