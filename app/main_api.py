@@ -27,11 +27,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-## static 폴더 mounting작업
-app.mount("/static",StaticFiles(directory=Path(__file__).absolute().parent.parent.absolute() / "static"),name="static")
+# ## static 폴더 mounting작업
+# app.mount("/static",StaticFiles(directory=Path(__file__).absolute().parent.parent.absolute() / "static"),name="static")
 
-## 템플릿 구성을 위해 Jinja2 활용
-templates = Jinja2Templates(directory="templates")
+# ## 템플릿 구성을 위해 Jinja2 활용
+# templates = Jinja2Templates(directory="templates")
 
 @app.post('/uploadfile/')
 async def uploadfile(request: Request, file: UploadFile):
@@ -51,10 +51,10 @@ async def uploadfile(request: Request, file: UploadFile):
     array_annotation.array_annotation("./input_data/"+file.filename)
     return "uploaded array file"
 
-# 메인페이지
-@app.get("/")
-async def root(request:Request):
-    return templates.TemplateResponse("index.html", {"request":request})
+# # 메인페이지
+# @app.get("/")
+# async def root(request:Request):
+#     return templates.TemplateResponse("index.html", {"request":request})
 
 @app.get("/disease_trait")
 # @app.get("/")
@@ -84,6 +84,7 @@ async def overview_page(request:Request, bio_input:str, user:str):
     res_json['tkm'] = tkm
     res_json['medicine'] = medicine
     res_json['user'] = user
+    
 
     return res_json
 
