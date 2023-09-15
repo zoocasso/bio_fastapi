@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+
+import sys
+sys.path.append("./")
+
 from app import get_bio_everything
 from app.vcf_annotation import vcf_annotation
 from app.array_annotation import array_annotation
