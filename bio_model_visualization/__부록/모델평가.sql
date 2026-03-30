@@ -1,0 +1,1 @@
+SELECT topic_id , count(topic_id) FROM lda_model_edit_join_tkm_table group by topic_id ORDER BY topic_id
