@@ -2,7 +2,7 @@
 
 # 🧬 Bio FastAPI — Genomic Variant Annotation Platform
 
-**Big-Data Bioinformatics Pipeline & Full-Stack Analysis System**
+**Variant annotation & risk-report backend over ~1 TB of public genomic reference data**
 
 [![EN](https://img.shields.io/badge/Language-English-blue?style=flat-square)](#-english)
 [![KR](https://img.shields.io/badge/언어-한국어-red?style=flat-square)](#-한국어)
@@ -13,51 +13,47 @@
 
 ## 🇺🇸 English
 
-A full-stack genomic variant annotation platform that ingests raw bioinformatics data (VCF/Array) at scale, builds an optimized in-house reference database, and delivers real-time disease-risk analysis through a FastAPI web interface.
+The backend of a genomic variant annotation and risk-report system, built at Vision Inside for an international collaboration between Kyung Hee University's College of Korean Medicine and a Canadian bio research lab (Aug 2022 – Sep 2023). I was the **sole developer of the data pipeline and backend**; a separate developer built the user-facing frontend.
 
 ### 📋 Project Overview
 
-An end-to-end bioinformatics system covering the full lifecycle — from raw-data ingestion and database construction to user-facing annotation and visualization. The platform annotates user-uploaded genomic data by cross-referencing it against a curated, multi-source variant database and produces disease-association reports in real time.
+The system turns a person's genomic data (VCF or genotyping-array file) into disease/trait reports by annotating it against a large, multi-source public reference database.
 
-- **Scope:** Backend pipeline, database engineering, full-stack web system
-- **Data Scale:** 100GB+ raw genomic source data
-- **Architecture:** 4-stage SQL join pipeline (dbSNP → GWAS → 1KGP → UniProt)
+- **Role:** Sole developer — data pipeline, reference database, FastAPI backend, deployment
+- **Reference data:** ~1 TB of public sources — dbSNP GRCh37/38 (237 GB), 1000 Genomes (770 GB), GWAS Catalog, UniProt variants
+- **Annotation:** 4-stage SQL join keyed on (chrom, pos, ref, alt): dbSNP → GWAS → 1KGP → UniProt
+- **This repository:** the FastAPI service (result viewer and, from Sep 2023, a JSON API for the separate frontend). The variant-calling pipeline and the reference-DB build scripts lived in separate internal projects.
 
 ### 🛠 Tech Stack
 
 | Layer | Technology |
 |---|---|
-| **Backend** | FastAPI, Python (Pandas, NumPy, SQLAlchemy, PyVCF) |
-| **Database** | MySQL (composite indexing, query optimization) |
-| **Frontend** | HTML/JS, Tabulator.js (interactive data grid) |
-| **DevOps** | Docker, Docker Compose, Harbor Registry, Linux (Bash, sed, split) |
-| **Crawling** | BeautifulSoup4, Requests |
+| **Backend** | FastAPI, Python (pandas, NumPy, SQLAlchemy, PyVCF) |
+| **Database** | MySQL (composite keys and indexes) |
+| **Result viewer** | Jinja2 templates, Tabulator.js |
+| **Upstream pipeline** | BWA, samtools, Picard, GATK (FASTQ → VCF) |
+| **Deployment** | Docker, Harbor private registry, Ubuntu server (DNS/HTTPS via Let's Encrypt) |
+| **Crawling** | BeautifulSoup4, Requests (MedlinePlus, MeSH, NCBI) |
 
-### 🚀 Core Engineering Contributions
+### 🚀 What I Built
 
-#### 1. Big-Data ETL & Database Optimization
-- **Memory-Safe Preprocessing** — Split 114GB+ VCF/TXT files by chromosome using Linux `sed` and `split`, preventing out-of-memory failures during ingestion.
-- **Composite Indexing** — Designed compound keys (`connect_key` = chrom-pos-ref-alt, `rsID_ALT`) to unify fragmented dbSNP, GWAS, 1KGP, and UniProt sources, dramatically accelerating lookup performance.
-- **Data Cleansing Logic** — Implemented Python routines for semicolon-delimited GWAS Catalog parsing and per-ethnicity 1KGP distribution calculation.
+#### 1. Reference Database (~1 TB)
+- **Chromosome-wise ingestion** — Split the large dbSNP and 1000 Genomes files by chromosome with `sed`/`split`, then loaded them into MySQL with chunked pandas/SQLAlchemy writes to stay within memory.
+- **Composite keys** — Unified dbSNP, GWAS, 1KGP, and UniProt records with keys such as `connect_key` (chrom-pos-ref-alt) and `rsID_ALT`, indexed for lookup.
+- **Data cleansing** — Parsed semicolon-delimited GWAS Catalog fields and computed allele frequencies for the 26 1000 Genomes populations.
 
-#### 2. Genomic Annotation Pipeline
-- **VCF/Array Parsing** — Built a normalizer using `PyVCF` and regular expressions that standardizes heterogeneous user inputs into a unified internal format.
-- **4-Stage SQL Join** — Developed cascading join logic across the 4-tier reference database (dbSNP → GWAS → 1KGP → UniProt) to produce the final annotation table.
-- **Risk Scoring** — Implemented genotype-vs-effect-allele matching logic that computes a `risk_score` per variant for downstream disease-association analysis.
+#### 2. Annotation & Report Logic
+- **Input normalization** — Normalized heterogeneous VCF/array inputs with `PyVCF` and regular expressions.
+- **4-stage SQL join** — Cascaded joins across the reference tables to produce the final annotation table.
+- **Rule-based risk scores** — Matched the user's genotype against GWAS effect alleles and scored disease/trait risk from GWAS odds ratios/betas (a rule-based score, not an ML prediction). Added 26-population allele-frequency comparisons and drug/herbal-medicine lookups (MedlinePlus, MeSH, ATC, PharmDB-K, OASIS).
 
-#### 3. Full-Stack Implementation (FastAPI)
-- **Interactive Data Grid** — Integrated `Tabulator.js` to enable lag-free query, filter, and sort operations over tens of thousands of annotation rows in the browser.
-- **RESTful API Design** — Designed endpoints for genomic file upload, per-disease summary retrieval, and ethnicity-distribution data delivery.
+#### 3. FastAPI Service
+- **Endpoints** — Genomic file upload, per-disease summaries, and population-distribution data.
+- **Result viewer** — A Tabulator.js grid for querying, filtering, and sorting annotation results in the browser.
 
-#### 4. Containerized Infrastructure
-- **Dockerization** — Managed the full environment via `Dockerfile` and `docker-compose`, ensuring reproducible deployment across dev and production.
-- **Private Registry** — Operated image tagging, push, and pull workflows through Harbor for controlled internal distribution.
-
-### 💡 Technical Achievements
-
-- Handled **100GB+ raw data** ingestion with zero loss, backed by index-driven query optimization.
-- Translated a multi-stage analysis design into a production real-time system through tight Python–SQL integration.
-- Established a Docker-based deployment workflow that measurably reduced environment setup and release overhead.
+#### 4. Deployment
+- **Docker + Harbor** — Packaged the service with a `Dockerfile` and shipped images through a Harbor private registry I set up on a Korea IDC Ubuntu server (domain and HTTPS via Let's Encrypt).
+- **Access** — The production server allowed internal IPs only; the system was not publicly launched.
 
 <div align="right"><a href="#-한국어">🇰🇷 한국어로 보기 ↓</a></div>
 
@@ -65,51 +61,47 @@ An end-to-end bioinformatics system covering the full lifecycle — from raw-dat
 
 ## 🇰🇷 한국어
 
-대용량 생물정보 데이터(VCF/Array)를 수집·정제하여 최적화된 자체 레퍼런스 DB를 구축하고, FastAPI 웹 인터페이스를 통해 실시간 질병 위험도 분석을 제공하는 풀스택 유전체 변이 어노테이션 플랫폼입니다.
+비전인사이드에서 경희대 한의대 × 캐나다 바이오 연구소 국제 협업 과제(2022.08 ~ 2023.09)를 위해 만든 유전체 변이 주석·위험도 리포트 시스템의 백엔드입니다. **데이터 파이프라인과 백엔드는 단독 개발**했고, 사용자용 프론트엔드는 별도 개발자가 맡았습니다.
 
 ### 📋 프로젝트 개요
 
-원천 데이터 수집과 DB 구축에서부터 사용자 대상 어노테이션 및 시각화까지 전체 수명주기를 아우르는 end-to-end 생물정보 시스템입니다. 사용자가 업로드한 유전체 데이터를 다중 소스 기반으로 큐레이션된 변이 DB와 대조하여 질병 연관성 리포트를 실시간으로 생성합니다.
+개인의 유전체 데이터(VCF 또는 칩 array 파일)를 대규모 공개 레퍼런스 DB와 대조해 질병·형질 리포트로 만드는 시스템입니다.
 
-- **범위:** 백엔드 파이프라인, 데이터베이스 엔지니어링, 풀스택 웹 시스템
-- **데이터 규모:** 100GB+ 원천 유전체 데이터
-- **아키텍처:** 4단계 SQL Join 파이프라인 (dbSNP → GWAS → 1KGP → UniProt)
+- **역할:** 단독 개발 — 데이터 파이프라인, 레퍼런스 DB, FastAPI 백엔드, 배포
+- **레퍼런스 데이터:** 공개 데이터 약 1 TB — dbSNP GRCh37/38(237 GB), 1000 Genomes(770 GB), GWAS Catalog, UniProt 변이
+- **주석:** (chrom, pos, ref, alt) 기준 4단계 SQL 조인 — dbSNP → GWAS → 1KGP → UniProt
+- **이 저장소:** FastAPI 서비스(결과 뷰어, 2023-09부터는 별도 프론트엔드용 JSON API). 변이 호출 파이프라인과 레퍼런스 DB 구축 스크립트는 사내 별도 프로젝트에 있었습니다.
 
 ### 🛠 기술 스택
 
 | 계층 | 기술 |
 |---|---|
-| **백엔드** | FastAPI, Python (Pandas, NumPy, SQLAlchemy, PyVCF) |
-| **데이터베이스** | MySQL (복합 인덱싱, 쿼리 최적화) |
-| **프론트엔드** | HTML/JS, Tabulator.js (동적 데이터 그리드) |
-| **DevOps** | Docker, Docker Compose, Harbor Registry, Linux (Bash, sed, split) |
-| **크롤링** | BeautifulSoup4, Requests |
+| **백엔드** | FastAPI, Python (pandas, NumPy, SQLAlchemy, PyVCF) |
+| **데이터베이스** | MySQL (복합 키·인덱스) |
+| **결과 뷰어** | Jinja2 템플릿, Tabulator.js |
+| **상위 파이프라인** | BWA, samtools, Picard, GATK (FASTQ → VCF) |
+| **배포** | Docker, Harbor 사설 레지스트리, Ubuntu 서버 (Let's Encrypt로 도메인·HTTPS) |
+| **크롤링** | BeautifulSoup4, Requests (MedlinePlus, MeSH, NCBI) |
 
-### 🚀 핵심 엔지니어링 기여
+### 🚀 구현한 것
 
-#### 1. 대용량 ETL 및 데이터베이스 최적화
-- **메모리 안전 전처리** — 114GB+ VCF/TXT 파일을 `sed`, `split`을 활용해 Chromosome 단위로 분할 처리하여 메모리 부하 및 적재 중 OOM을 방지했습니다.
-- **복합 인덱싱 설계** — 흩어진 dbSNP, GWAS, 1KGP, UniProt 데이터를 통합하기 위해 `connect_key` (chrom-pos-ref-alt), `rsID_ALT` 등의 복합 키를 설계·인덱싱하여 조회 속도를 대폭 개선했습니다.
-- **데이터 정제 로직** — GWAS Catalog의 세미콜론(`;`) 구분 데이터 분리, 1KGP 인종별 분포 계산 등 복잡한 변환을 Python으로 구현했습니다.
+#### 1. 레퍼런스 DB (약 1 TB)
+- **염색체 단위 적재** — 대용량 dbSNP·1000 Genomes 파일을 `sed`/`split`으로 염색체별로 나눈 뒤, pandas·SQLAlchemy 청크 적재로 메모리 한도 안에서 MySQL에 넣었습니다.
+- **복합 키** — `connect_key`(chrom-pos-ref-alt), `rsID_ALT` 같은 키로 dbSNP·GWAS·1KGP·UniProt 레코드를 연결하고 인덱스를 걸었습니다.
+- **데이터 정제** — GWAS Catalog의 세미콜론 구분 필드를 분리하고, 1000 Genomes 26개 집단별 대립유전자 빈도를 계산했습니다.
 
-#### 2. 유전체 어노테이션 파이프라인
-- **VCF/Array 파싱** — `PyVCF`와 정규표현식(`re`)을 활용해 이질적인 사용자 입력을 표준화된 내부 포맷으로 정규화하는 파서를 구축했습니다.
-- **4단계 SQL Join** — 자체 구축한 4단계 레퍼런스 DB(dbSNP → GWAS → 1KGP → UniProt)를 연쇄 조인하여 최종 어노테이션 테이블을 생성하는 로직을 개발했습니다.
-- **위험도 산출** — 사용자 유전형(Allele)과 GWAS의 Effect Allele을 대조하여 변이별 `risk_score`를 산출하는 백엔드 로직을 구현했습니다.
+#### 2. 주석·리포트 로직
+- **입력 정규화** — `PyVCF`와 정규표현식으로 형식이 제각각인 VCF·array 입력을 정규화했습니다.
+- **4단계 SQL 조인** — 레퍼런스 테이블을 연쇄 조인해 최종 주석 테이블을 만들었습니다.
+- **규칙형 위험점수** — 사용자 유전형을 GWAS effect allele과 대조하고, GWAS 오즈비·베타로 질병·형질 위험점수를 계산했습니다(ML 예측이 아닌 규칙 기반). 1000 Genomes 26개 집단 빈도 비교와 의약품·한약재 정보(MedlinePlus, MeSH, ATC, PharmDB-K, OASIS) 조회도 넣었습니다.
 
-#### 3. 풀스택 구현 (FastAPI)
-- **인터랙티브 데이터 그리드** — `Tabulator.js`를 도입해 수만 건의 어노테이션 결과를 브라우저 환경에서 지연 없이 조회·필터링·정렬할 수 있도록 구현했습니다.
-- **RESTful API 설계** — 유전체 파일 업로드, 질병별 요약 정보 조회, 인종별 분포도 데이터 전송을 위한 엔드포인트를 설계했습니다.
+#### 3. FastAPI 서비스
+- **엔드포인트** — 유전체 파일 업로드, 질병별 요약, 집단별 분포 데이터
+- **결과 뷰어** — Tabulator.js 그리드로 브라우저에서 주석 결과를 조회·필터·정렬
 
-#### 4. 컨테이너 기반 인프라
-- **Dockerization** — `Dockerfile`과 `docker-compose`로 전체 환경을 관리하여 개발·운영 환경 간의 재현성을 확보했습니다.
-- **Private Registry** — Harbor를 활용한 이미지 태깅, Push/Pull 워크플로우를 운영하여 이미지 배포를 체계화했습니다.
-
-### 💡 주요 성과
-
-- **100GB+ 원천 데이터**를 유실 없이 적재하고 인덱싱 기반 쿼리 최적화를 수행했습니다.
-- 다단계 분석 설계를 Python–SQL의 유기적 결합을 통해 실시간 운영 시스템으로 구체화했습니다.
-- Docker 기반 배포 워크플로우를 수립하여 환경 구성 및 릴리즈 부담을 체계적으로 절감했습니다.
+#### 4. 배포
+- **Docker + Harbor** — `Dockerfile`로 서비스를 패키징하고, Korea IDC Ubuntu 서버에 직접 구축한 Harbor 사설 레지스트리로 이미지를 배포했습니다(Let's Encrypt로 도메인·HTTPS).
+- **접근 범위** — 운영서버는 내부 IP 접근만 허용했고, 외부에 공개하지는 않았습니다.
 
 <div align="right"><a href="#-english">🇺🇸 View in English ↑</a></div>
 
