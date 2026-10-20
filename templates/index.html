@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{{ url_for('static', path='/style.css') }}" rel="stylesheet">
+    <title>GeneLinks report</title>
+</head>
+<body>
+    <h3>Upload a VCF file</h3>
+    <div class="upload_div">
+        <form class="upload_form" data-endpoint="/uploadfile/" enctype="multipart/form-data">
+            <input name="file" type="file" accept=".vcf" required>
+            <button type="submit">Upload and annotate</button>
+        </form>
+    </div>
+    <h3>Upload a chip array export</h3>
+    <div class="upload_div">
+        <form class="upload_form" data-endpoint="/uploadfile/array/" enctype="multipart/form-data">
+            <input name="file" type="file" accept=".txt,.tsv" required>
+            <button type="submit">Upload and annotate</button>
+        </form>
+    </div>
+    <p id="upload_status" role="status"></p>
+
+    <h3>Reports</h3>
+    <div id="user_div">
+        {% for user in users %}
+        <form class="user_form" action="/disease_trait">
+            <input type="submit" name="user" value="{{ user }}">
+        </form>
+        {% else %}
+        <p>No reports yet.</p>
+        {% endfor %}
+    </div>
+    <script>
+        const status = document.querySelector("#upload_status");
+        document.querySelectorAll(".upload_form").forEach((form) => {
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const button = form.querySelector("button");
+                button.disabled = true;
+                status.textContent = "Annotating… this takes a few minutes.";
+                try {
+                    const res = await fetch(form.dataset.endpoint, { method: "POST", body: new FormData(form) });
+                    const body = await res.json();
+                    if (!res.ok) throw new Error(body.detail || res.statusText);
+                    location.href = `/disease_trait?user=${encodeURIComponent(body.user)}`;
+                } catch (err) {
+                    status.textContent = `Upload failed: ${err.message}`;
+                    button.disabled = false;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

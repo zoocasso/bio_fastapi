@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GeneLinks_report</title>
+    <link href="{{url_for('static',path='/style.css')}}" rel="stylesheet">
+    <link href="https://unpkg.com/tabulator-tables@5.4.3/dist/css/tabulator_semanticui.min.css" rel="stylesheet">
+</head>
+<body>
+    <a href="/">go home</a>
+    <h1>Overview | <a href ="/scientific_detail_page?bio_input={{bio_input}}&&user={{user}}">Scientific Detail</a></h1>
+    
+    <h3>disease_trait_list : {{bio_input}}</h3>
+    <div class="text-container">
+        <strong>summary</strong> : {{summary}}
+    </div>
+    <h3>we found {{snps_cnt}} of your genetic variants related with {{bio_input}}</h3>
+    <p><strong>snps_riskscore_1kgp (click row)</strong></p>
+    <div id="snps_riskscore_1kgp"></div>
+    <p><strong>medlineplus</strong>
+    <div id="medlineplus"></div>
+    <p><strong>tkm (click row)</strong></p>
+    <div id="tkm"></div>
+    <p><strong>medicine</strong></p>
+    <div id="medicine"></div>
+    
+    <script src="{{url_for('static',path='/js/pages.js')}}"></script>
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
+    <script>
+        var sch = location.search
+        var params = new URLSearchParams(sch);
+
+        var snps_riskscore_1kgp = {{snps_riskscore_1kgp|tojson}};
+        var snps_riskscore_1kgp_table = new Tabulator('#snps_riskscore_1kgp',{
+            data:snps_riskscore_1kgp,
+            pagination:"local",
+            paginationSize:10,
+            columns:[
+                {title:"DISEASE_TRAIT", field:"DISEASE_TRAIT"},
+                {title:"SNPS", field:"SNPS"},
+                {title:"risk_score", field:"risk_score"},
+                {title:"risk_level", field:"risk_level"},
+                {title:"CI", field:"CI"},
+                {title:"risk_type", field:"risk_type"},
+            ],
+        });
+        snps_riskscore_1kgp_table.on("rowClick",function(e,row){
+            window.location.href = '/igsr?snps='+row._row.data.SNPS+'&&user='+params.get('user');
+        });
+
+        var medlineplus = {{medlineplus|tojson}};
+        var medlineplus_table = new Tabulator('#medlineplus',{
+            data:medlineplus,
+            pagination:"local",
+            paginationSize:10,
+            columns:[
+                {title:"section", field:"title"},
+                {title:"title", field:"link_title"},
+                {title:"link", field:"link", formatter:"link", formatterParams:{target:"_blank"}},
+            ],
+        });
+
+        // for (i=0; i<medlineplus.length; i++){
+        //     console.log(medlineplus[i])
+        // }
+
+        var tkm = {{tkm|tojson}};
+        var tkm_table = new Tabulator('#tkm',{
+            data:tkm,
+            pagination:"local",
+            paginationSize:10,
+            columns:[
+                // {formatter:"rowSelection", titleFormatter:"rowSelection", hozAlign:"center", 
+                // headerSort:false
+                // },
+                {title:"tkm_key", field:"tkm_key"},
+                {title:"tkm_kor", field:"tkm_kor"},
+                {title:"tkm_chn", field:"tkm_chn"},
+                {title:"tkm_eng", field:"tkm_eng"},
+            ],
+        });
+        tkm_table.on("rowClick",function(e,row){
+            window.location.href = '/oasis?tkm_key='+row._row.data.tkm_key;
+        });
+
+        var medicine = {{medicine|tojson}};
+        var medicine_table = new Tabulator('#medicine',{
+            data:medicine,
+            pagination:"local",
+            paginationSize:10,
+            columns:[
+                {title:"TKM_KEY", field:"TKM_KEY"},
+                {title:"품목기준코드", field:"품목기준코드"},
+                {title:"제품명", field:"제품명"},
+                {title:"제품영문명", field:"제품영문명"},
+                {title:"업체명", field:"업체명"},
+                {title:"허가일", field:"허가일"},
+                {title:"품목구분", field:"품목구분"},
+                {title:"허가번호", field:"허가번호"},
+                {title:"취소/취하", field:"취소/취하"},
+                {title:"취소/취하일자", field:"취소/취하일자"},
+                {title:"주성분", field:"주성분"},
+                {title:"첨가제", field:"첨가제"},
+                {title:"품목분류", field:"품목분류"},
+                {title:"전문의약품", field:"전문의약품"},
+                {title:"완제/원료", field:"완제/원료"},
+                {title:"허가/신고", field:"허가/신고"},
+                {title:"제조/수입", field:"제조/수입"},
+                {title:"마약구분", field:"마약구분"},
+                {title:"모양", field:"모양"},
+                {title:"색상", field:"색상"},
+                {title:"제형", field:"제형"},
+                {title:"장축", field:"장축"},
+                {title:"단축", field:"단축"},
+                {title:"신약구분", field:"신약구분"},
+                {title:"표준코드명", field:"표준코드명"},
+                {title:"ATC코드", field:"ATC코드"},
+                {title:"묶음의약품정보", field:"묶음의약품정보"},
+                {title:"e은약요", field:"e은약요"},
+                {title:"수입제조국", field:"수입제조국"},
+                {title:"주성분영문", field:"주성분영문"},
+            ],
+        });
+    </script>
+</body>
+</html>

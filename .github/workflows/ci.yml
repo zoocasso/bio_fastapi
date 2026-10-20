@@ -1,0 +1,49 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: python -m pytest -q
+
+  # the whole pipeline on a real MySQL, with a few seeded rows of every reference table
+  mysql:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        mysql: ["8.0", "8.4"]
+    services:
+      mysql:
+        image: mysql:${{ matrix.mysql }}
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: bio_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot --silent"
+          --health-interval=5s --health-timeout=5s --health-retries=30
+    env:
+      BIO_TEST_MYSQL_URL: mysql+pymysql://root:root@127.0.0.1:3306/bio_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+      - name: end-to-end tests (fail if they were skipped)
+        shell: bash
+        run: |
+          python -m pytest -q -rs tests/test_mysql_pipeline.py | tee pytest.log
+          ! grep -q SKIPPED pytest.log

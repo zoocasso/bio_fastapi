@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GeneLinks_report</title>
+    <link href="{{url_for('static',path='/style.css')}}" rel="stylesheet">
+    <link href="https://unpkg.com/tabulator-tables@5.4.3/dist/css/tabulator_semanticui.min.css" rel="stylesheet">
+</head>
+<body>
+    <p><strong>oasis_clinical</strong></p>
+    <div id="oasis_clinical"></div>
+    <p><strong>oasis_preclinical</strong></p>
+    <div id="oasis_preclinical"></div>
+    <p><strong>oasis_reference</strong></p>
+    <div id="oasis_reference"></div>
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
+    <script src="{{url_for('static',path='/js/script.js')}}"></script>
+    <script>
+        var oasis_clinical = {{oasis_clinical|tojson}};
+        var oasis_clinical_table = new Tabulator('#oasis_clinical',{
+            data:oasis_clinical,
+            pagination:"local",
+            paginationSize:10,
+            columns:[
+                {title:"tkm_key", field:"tkm_key"},
+                {title:"tkm_kor", field:"tkm_kor"},
+                {title:"tkm_chn", field:"tkm_chn"},
+                {title:"tkm_eng", field:"tkm_eng"},
+                {title:"category", field:"category"},
+                {title:"clinical_target", field:"clinical_target"},
+                {title:"patient_info", field:"patient_info"},
+                {title:"intake_info", field:"intake_info"},
+                {title:"effect", field:"effect"},
+                {title:"concurrent_infusion", field:"concurrent_infusion"},
+                {title:"ref_no", field:"ref_no"},
+            ],
+        });
+
+        var oasis_preclinical = {{oasis_preclinical|tojson}};
+        var oasis_preclinical_table = new Tabulator('#oasis_preclinical',{
+            data:oasis_preclinical,
+            pagination:"local",
+            paginationSize:10,
+            columns:[
+                {title:"tkm_key", field:"tkm_key"},
+                {title:"tkm_kor", field:"tkm_kor"},
+                {title:"tkm_chn", field:"tkm_chn"},
+                {title:"tkm_eng", field:"tkm_eng"},
+                {title:"category", field:"category"},
+                {title:"preclinical_target", field:"preclinical_target"},
+                {title:"model_info_1", field:"model_info_1"},
+                {title:"model_info_2", field:"model_info_2"},
+                {title:"effect", field:"effect"},
+                {title:"ref_no", field:"ref_no"},
+            ],
+        });
+
+        var oasis_reference = {{oasis_reference|tojson}};
+        var oasis_reference_table = new Tabulator('#oasis_reference',{
+            data:oasis_reference,
+            pagination:"local",
+            paginationSize:10,
+            columns:[
+                {title:"tkm_key", field:"tkm_key"},
+                {title:"약재명", field:"약재명"},
+                {title:"No", field:"No"},
+                {title:"참고문헌", field:"참고문헌"},
+                {title:"url", field:"url", width:300, formatter:"link", formatterParams:{target:"_blank"}},
+            ],
+        });
+    </script>
+</body>
+</html>
