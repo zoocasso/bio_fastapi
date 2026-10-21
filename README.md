@@ -6,13 +6,13 @@
 
 ## English
 
-The backend of a genomic variant annotation and risk-report system, built at Vision Inside for an international project between Kyung Hee University's College of Korean Medicine and a Canadian bio research institute (Aug 2022 – Sep 2023). I built the data pipeline and the backend on my own; another developer built the user-facing frontend.
+The backend of a genomic variant annotation and risk-report system, built at Vision Inside for an international project between Kyung Hee University's College of Korean Medicine and a Canadian bio research institute (Aug 2022 – Sep 2023). I implemented the data pipeline and the backend, on a design I worked out with my team lead; another developer built the user-facing frontend.
 
 A person's genotypes, from a VCF or a genotyping-chip export, are joined to about **1 TB of public references**: dbSNP (237 GB), 1000 Genomes (770 GB), the GWAS Catalog and UniProt variants. The result is a report per disease or trait: the GWAS effect sizes behind it with a rule-of-thumb score, allele frequencies in the 26 populations of 1000 Genomes, and related drugs and herbal medicines (MedlinePlus, ATC, PharmDB-K, OASIS). The joins use GRCh37 coordinates: the pipeline reads the GRCh37 tables of dbSNP.
 
 > **Research use only, not a diagnosis.** For an odds ratio the score is (OR − 1) × 100 × risk-allele copies, put into fixed bands: large increase (≥ 100), moderate increase (25 to 99), little change (−24 to 24) and decrease (≤ −25). The bands are cut-offs, not a statistical test. A BETA is in its trait's own unit and gets no score. The pages show the same notice.
 
-This repository holds the service code, cleaned up and rewritten in October 2026. The pipeline's design was worked out at Vision Inside with my team lead. The variant-calling steps upstream of it (BWA, samtools, Picard, GATK) and the loading of the reference tables are not in this repository. The original service ran on an internal server reachable only from the company network; this rewrite has only run on test fixtures and in CI.
+This repository holds the service code, cleaned up and rewritten in October 2026. The variant-calling steps upstream of it (BWA, samtools, Picard, GATK) and the loading of the reference tables are not in this repository. The original service ran on an internal server reachable only from the company network; this rewrite has only run on test fixtures and in CI.
 
 ### How it works
 
@@ -63,13 +63,13 @@ An unknown user is `404` and an invalid user id `400`. An upload is `422` when i
 
 ## 한국어
 
-비전인사이드에서 경희대 한의대 × 캐나다 바이오 연구소 국제 협업 과제(2022.08 ~ 2023.09)를 위해 만든 유전체 변이 주석·위험도 리포트 시스템의 백엔드입니다. **데이터 파이프라인과 백엔드는 단독 개발**했고, 사용자용 프론트엔드는 다른 개발자가 맡았습니다.
+비전인사이드에서 경희대 한의대 × 캐나다 바이오 연구소 국제 협업 과제(2022.08 ~ 2023.09)를 위해 만든 유전체 변이 주석·위험도 리포트 시스템의 백엔드입니다. 데이터 파이프라인과 백엔드는 팀장님과 함께 설계하고 제가 구현했으며, 사용자용 프론트엔드는 다른 개발자가 맡았습니다.
 
 개인의 유전형(VCF 또는 유전자 칩 export)을 **공개 레퍼런스 약 1 TB**(dbSNP 237 GB, 1000 Genomes 770 GB, GWAS Catalog, UniProt 변이)와 조인해 질병·형질별 리포트를 만듭니다. 조인은 GRCh37 좌표 기준이며, 파이프라인은 dbSNP의 GRCh37 테이블을 읽습니다. 리포트에는 근거가 된 GWAS 효과 크기와 어림 점수, 1000 Genomes 26개 집단의 대립유전자 빈도, 관련 의약품·한약재 정보(MedlinePlus, ATC, PharmDB-K, OASIS)가 들어갑니다.
 
 > **연구용이며 진단이 아닙니다.** 오즈비의 점수는 (OR − 1) × 100 × 위험 대립유전자 수이고, 고정 구간으로 나눕니다: 크게 증가(≥ 100), 다소 증가(25~99), 변화 작음(−24~24), 감소(≤ −25). 구간은 정해 둔 기준일 뿐 통계 검정이 아닙니다. BETA는 형질마다 단위가 달라 점수를 매기지 않습니다. 페이지에도 같은 안내가 나옵니다.
 
-이 저장소는 서비스 코드를 2026년 10월에 정리해 다시 쓴 것입니다. 파이프라인 설계는 비전인사이드에서 팀장님과 함께 했습니다. 앞단의 변이 호출(BWA, samtools, Picard, GATK)과 레퍼런스 테이블 적재 코드는 이 저장소에 없습니다. 원래 서비스는 사내망에서만 접근할 수 있는 내부 서버에서 운영했고, 이 재작성본은 테스트 데이터와 CI에서만 실행했습니다.
+이 저장소는 서비스 코드를 2026년 10월에 정리해 다시 쓴 것입니다. 앞단의 변이 호출(BWA, samtools, Picard, GATK)과 레퍼런스 테이블 적재 코드는 이 저장소에 없습니다. 원래 서비스는 사내망에서만 접근할 수 있는 내부 서버에서 운영했고, 이 재작성본은 테스트 데이터와 CI에서만 실행했습니다.
 
 - **입력**: [`app/inputs.py`](app/inputs.py)가 유전형을 읽습니다. VCF는 PyVCF3, 칩 export는 pandas를 씁니다. 염색체 이름(`chr1` → `1`, `chrM` → `MT`, 칩 코드 23–26과 `XY` → X, Y, X, MT)과 대립유전자(대문자)를 정규화해 SQL이 정확히 비교하게 합니다. VCF 변이는 본인이 가진 ALT로 키를 만들어, `0/2`가 첫 번째 ALT로 읽히지 않습니다.
 - **GWAS 단계**: 위험 대립유전자가 그 변이의 REF나 ALT이면 연관을 남기고, 본인이 가진 개수를 셉니다. 콜이 없거나 유전형이 그 변이의 REF·ALT가 아니면(반대 가닥, I/D 표기) 개수는 0이 아니라 '알 수 없음'이고 점수도 없습니다. 변이가 하나도 dbSNP에 없으면(대개 다른 게놈 빌드) 업로드를 `422`로 거절합니다.
