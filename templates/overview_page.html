@@ -7,6 +7,7 @@
     <link href="https://unpkg.com/tabulator-tables@5.4.3/dist/css/tabulator_semanticui.min.css" rel="stylesheet">
 </head>
 <body>
+    {% include "_disclaimer.html" %}
     <a href="/">go home</a>
     <h1>Overview | <a href ="/scientific_detail_page?bio_input={{bio_input}}&&user={{user}}">Scientific Detail</a></h1>
     
@@ -17,6 +18,9 @@
     <h3>we found {{snps_cnt}} of your genetic variants related with {{bio_input}}</h3>
     <p><strong>snps_riskscore_1kgp (click row)</strong></p>
     <div id="snps_riskscore_1kgp"></div>
+    <p class="note">score = (OR &minus; 1) &times; 100 &times; risk-allele copies, for odds ratios only; a BETA is in its trait's own
+    unit and gets no score. Bands: &ge; 100 large increase, 25 to 99 moderate increase, &minus;24 to 24 little change, &le; &minus;25 decrease.
+    They are fixed cut-offs, not a statistical test. Copies are blank when the genotype is a no-call or does not match the variant's alleles.</p>
     <p><strong>medlineplus</strong>
     <div id="medlineplus"></div>
     <p><strong>tkm (click row)</strong></p>
@@ -24,8 +28,7 @@
     <p><strong>medicine</strong></p>
     <div id="medicine"></div>
     
-    <script src="{{url_for('static',path='/js/pages.js')}}"></script>
-    <script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.4.3/dist/js/tabulator.min.js"></script>
     <script>
         var sch = location.search
         var params = new URLSearchParams(sch);
@@ -38,10 +41,12 @@
             columns:[
                 {title:"DISEASE_TRAIT", field:"DISEASE_TRAIT"},
                 {title:"SNPS", field:"SNPS"},
-                {title:"risk_score", field:"risk_score"},
-                {title:"risk_level", field:"risk_level"},
+                {title:"OR or BETA", field:"OR"},
                 {title:"CI", field:"CI"},
-                {title:"risk_type", field:"risk_type"},
+                {title:"type", field:"risk_type"},
+                {title:"risk-allele copies", field:"copies"},
+                {title:"score", field:"risk_score"},
+                {title:"band", field:"risk_level"},
             ],
         });
         snps_riskscore_1kgp_table.on("rowClick",function(e,row){

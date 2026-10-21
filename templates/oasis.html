@@ -13,8 +13,7 @@
     <div id="oasis_preclinical"></div>
     <p><strong>oasis_reference</strong></p>
     <div id="oasis_reference"></div>
-    <script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
-    <script src="{{url_for('static',path='/js/script.js')}}"></script>
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.4.3/dist/js/tabulator.min.js"></script>
     <script>
         var oasis_clinical = {{oasis_clinical|tojson}};
         var oasis_clinical_table = new Tabulator('#oasis_clinical',{

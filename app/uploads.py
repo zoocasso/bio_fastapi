@@ -61,7 +61,7 @@ def save_upload(file: UploadFile) -> tuple[Path, str]:
     stem, suffix = Path(name).stem, Path(name).suffix.lower()
     if suffix not in ALLOWED_SUFFIXES:
         raise HTTPException(status_code=400, detail=f"expected one of {sorted(ALLOWED_SUFFIXES)}")
-    if not USER_ID.match(stem):
+    if not USER_ID.fullmatch(stem):
         raise HTTPException(status_code=400, detail="the file name may use only letters, digits and _")
     UPLOAD_DIRECTORY.mkdir(parents=True, exist_ok=True)
     target = UPLOAD_DIRECTORY / name

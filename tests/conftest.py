@@ -59,8 +59,10 @@ def _seed(conn) -> None:
         create_table(conn, table, rows)
     variant = {
         "DISEASE_TRAIT": "Asthma",
-        "risk_score": "30%",
-        "risk_level": "Slightly Increased",
+        "OR": "1.3",
+        "copies": 1,
+        "risk_score": 30,
+        "risk_level": "Moderate increase",
         "risk_type": "OR",
         "CI": "1.1-1.5",
         "VARIANT AA CHANGE": "p.R16G",

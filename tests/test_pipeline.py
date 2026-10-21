@@ -36,9 +36,10 @@ class RecordingCursor(pymysql.cursors.Cursor):
 
 
 class RecordingConnection:
-    def __init__(self, fail_on=None, column_length=None, result_exists=False):
+    def __init__(self, fail_on=None, column_length=None, result_exists=False, dbsnp_rows=1):
         self.statements, self.sent, self.events = [], [], []
         self.fail_on, self.column_length, self.result_exists = fail_on, column_length, result_exists
+        self.dbsnp_rows = dbsnp_rows
         # a real PyMySQL connection object that never connects; its cursors record their queries
         self.connection = pymysql.connections.Connection(defer_connect=True, cursorclass=RecordingCursor)
         self.connection.recorder = self
@@ -57,6 +58,8 @@ class RecordingConnection:
             return Result(self.column_length)
         if "information_schema.TABLES" in sql:
             return Result(int(self.result_exists))
+        if sql.startswith("SELECT COUNT(*)"):
+            return Result(self.dbsnp_rows)
         return Result(1)
 
     def commit(self):
@@ -92,7 +95,8 @@ def test_split_statements_skips_blank_tails():
 def test_staging_tables_include_the_temporary_ones():
     tables = pipeline.staging_tables(pipeline.VCF)
     assert tables[0] == "vcf"
-    assert {"connect_vcf_dbsnp_gwas_temp", "connect_vcf_dbsnp_gwas_temp2"} <= set(tables)
+    assert "connect_vcf_dbsnp_gwas_temp" in tables
+    assert "connect_vcf_dbsnp_array_all" in pipeline.staging_tables(pipeline.ARRAY)
     assert tables[-2:] == ["connect_vcf_dbsnp_gwas_1kgp_uniprot", pipeline.PREVIOUS_RESULT]
 
 
@@ -102,11 +106,12 @@ def test_per_chromosome_statements_join_their_own_chromosome(p):
     assert len(statements) == len(pipeline.CHROMOSOMES) == 25
     assert f"create table {p.stages[2].table}" in statements[0].lower()
     for chrom, statement in zip(pipeline.CHROMOSOMES, statements, strict=True):
-        assert f"= '{chrom}'" in statement and f"`1000genome_chr{chrom}`" in statement
-        assert "{chrom}" not in statement
+        # the value as app/inputs.py writes it ("X"), the table suffix in lower case ("x")
+        assert f"= '{chrom}'" in statement and f"`1000genome_chr{chrom.lower()}`" in statement
+        assert "{chrom}" not in statement and "{suffix}" not in statement
     assert all(f"insert into `{p.stages[2].table}`" in s for s in statements[1:])
-    dbsnp = pipeline.stage_statements(p, p.stages[0])
-    assert [s.split("_chr")[1].split()[0] for s in dbsnp] == list(pipeline.CHROMOSOMES)
+    dbsnp = [s for s in pipeline.stage_statements(p, p.stages[0]) if "_chr" in s]
+    assert [s.split("_chr")[1].split()[0] for s in dbsnp] == [c.lower() for c in pipeline.CHROMOSOMES]
 
 
 def test_stage_sql_reaches_pymysql_unformatted(conn):
@@ -118,7 +123,7 @@ def test_stage_sql_reaches_pymysql_unformatted(conn):
     ]
     assert c.sent == expected  # every statement, exactly as written
     with_percent = [s for s in expected if "%" in s]
-    assert len(with_percent) >= 4  # LIKE '%increase', REPLACE(risk_score, "%", "")
+    assert len(with_percent) >= 2  # LIKE '%increase' in both GWAS stages
     # what SQLAlchemy's exec_driver_sql did before: it passes {} and PyMySQL then %-formats
     cursor = c.connection.cursor()
     for statement in with_percent:
@@ -128,12 +133,12 @@ def test_stage_sql_reaches_pymysql_unformatted(conn):
 
 def test_a_run_is_locked_cleaned_and_renamed(conn):
     c = conn()
-    assert pipeline.run("vcf", DATA / "sample.vcf", "sample01") == 2
+    assert pipeline.run("vcf", DATA / "sample.vcf", "sample01") == 5
     s = c.statements
     assert s[0].startswith("SELECT GET_LOCK") and s[-1].startswith("SELECT RELEASE_LOCK")
     load = s.index("LOAD vcf")
     assert all(x.startswith("DROP TABLE IF EXISTS") for x in s[1:load])  # stale stage tables first
-    stages = [i for i, x in enumerate(s) if x.lower().startswith("create table")]
+    stages = [i for i, x in enumerate(s) if pipeline._CREATE.search(x)]
     assert stages == sorted(stages) and stages[0] > load
     rename = next(i for i, x in enumerate(s) if x.startswith("RENAME TABLE"))
     assert s[rename] == "RENAME TABLE `connect_vcf_dbsnp_gwas_1kgp_uniprot` TO `result_sample01`"
@@ -160,6 +165,15 @@ def test_a_failed_stage_rolls_back_and_still_cleans_up(conn):
     assert "rollback" in c.events
     assert not any(x.startswith("RENAME TABLE") for x in c.statements)
     assert c.statements[-2].startswith("DROP TABLE IF EXISTS") and c.statements[-1].startswith("SELECT RELEASE_LOCK")
+
+
+def test_nothing_in_dbsnp_is_refused_and_cleaned_up(conn):
+    c = conn(dbsnp_rows=0)
+    with pytest.raises(pipeline.NotInDbsnp, match="none of the 5 variants"):
+        pipeline.run("vcf", DATA / "sample.vcf", "sample01")
+    assert not any(x.startswith("RENAME TABLE") for x in c.statements)
+    assert not any("gwas_catelog" in x for x in c.statements)  # stopped after the dbSNP stage
+    assert "rollback" in c.events and c.statements[-1].startswith("SELECT RELEASE_LOCK")
 
 
 def test_an_empty_input_is_refused_before_touching_the_database(conn, tmp_path):

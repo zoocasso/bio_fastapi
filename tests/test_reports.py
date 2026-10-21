@@ -25,12 +25,24 @@ def test_population_frequencies_are_labelled(engine):
     assert freqs["JPT"]["value"] == 25
 
 
+def test_risk_rows_carry_the_effect_size_and_copies(engine):
+    [row, _] = reports.risk_scores("Asthma", USER)
+    assert (row["OR"], row["copies"], row["risk_score"], row["risk_level"]) == ("1.3", "1", "30", "Moderate increase")
+
+
+def test_a_variant_without_1000_genomes_data_has_no_frequency(engine):
+    with engine.begin() as conn:
+        conn.exec_driver_sql(f"UPDATE `{reports.result_table(USER)}` SET JPT = NULL WHERE SNPS = 'rs1'")
+    freqs = {f["key"]: f["value"] for f in reports.population_frequencies("rs1", USER)}
+    assert freqs["JPT"] is None and freqs["CEU"] == 25  # "no data", not 0%
+
+
 def test_request_values_are_never_part_of_the_sql(engine):
     # a quote in the trait would have ended the string in the old f-string query
     assert reports.risk_scores('Asthma" OR "1"="1', USER) == []
 
 
-@pytest.mark.parametrize("user", ["x; DROP TABLE medicine", "../x", "", "a" * 58])
+@pytest.mark.parametrize("user", ["x; DROP TABLE medicine", "../x", "", "a" * 58, "alice\n"])
 def test_invalid_user_ids_cannot_name_a_table(user):
     with pytest.raises(reports.UnknownUser):
         reports.result_table(user)

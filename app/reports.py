@@ -19,7 +19,8 @@ Row = dict[str, Any]
 # the pipeline's stage tables all start with "vcf" or "connect_", so no user id can name one of
 # them; MySQL table names are at most 64 characters
 RESULT_PREFIX = "result_"
-USER_ID = re.compile(rf"^[A-Za-z0-9_]{{1,{64 - len(RESULT_PREFIX)}}}$")
+# checked with fullmatch: a pattern ending in "$" would also accept "alice\n"
+USER_ID = re.compile(rf"[A-Za-z0-9_]{{1,{64 - len(RESULT_PREFIX)}}}")
 
 # 1000 Genomes populations, in the column order of the result table
 POPULATIONS = [
@@ -62,7 +63,7 @@ class NoReport(LookupError):
 
 
 def result_table(user: str) -> str:
-    if not USER_ID.match(user):
+    if not USER_ID.fullmatch(user):
         raise UnknownUser(f"invalid user id: {user!r}")
     return RESULT_PREFIX + user
 
@@ -104,7 +105,7 @@ def summary(topic: str) -> str:
 
 def risk_scores(trait: str, user: str) -> list[Row]:
     return _rows(
-        "SELECT DISEASE_TRAIT, SNPS, risk_score, risk_level, risk_type, CI, "
+        "SELECT DISEASE_TRAIT, SNPS, `OR`, CI, risk_type, copies, risk_score, risk_level, "
         f"{POPULATION_COLUMNS} FROM `{result_table(user)}` WHERE DISEASE_TRAIT = :trait",
         trait=trait,
     )
@@ -172,14 +173,15 @@ def oasis(tkm_key: str) -> dict[str, list[Row]]:
     }
 
 
-def _alt_frequency(value: Any) -> int:
-    """Percent of the alternative allele, from a stored frequency map such as "{'0': 0.8, '1': 0.2}"."""
+def _alt_frequency(value: Any) -> int | None:
+    """Percent of the alternative allele, from a stored frequency map such as "{'0': 0.8, '1': 0.2}";
+    None when 1000 Genomes has no record of the variant."""
     if not isinstance(value, str):
-        return 0
+        return None
     try:
         return math.floor(json.loads(value.replace("'", '"'))["1"] * 100)
     except (ValueError, KeyError, TypeError):
-        return 0
+        return None
 
 
 def population_frequencies(snp: str, user: str) -> list[Row]:

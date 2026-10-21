@@ -3,10 +3,11 @@
     input  ->  dbSNP (rsID)  ->  GWAS Catalog (risk)  ->  1000 Genomes (population frequency)  ->  UniProt
 
 Each stage is a SQL file in app/sql/<kind>/ that builds the next table from the previous one. dbSNP
-and 1000 Genomes are split into one table per chromosome, so a statement that names ``{chrom}`` is
-run once for each of CHROMOSOMES: the run for the first creates the table, the others insert into
-it. The stage tables are shared, so runs are serialized with a MySQL named lock, cleared before and
-after each run, and the final table is renamed to the user's result table.
+and 1000 Genomes are split into one table per chromosome, so a statement that names ``{chrom}`` (the
+chromosome as app/inputs.py writes it, such as "X") or ``{suffix}`` (its table suffix, "x") is run
+once for each of CHROMOSOMES: the run for the first creates the table, the others insert into it.
+The stage tables are shared, so runs are serialized with a MySQL named lock, cleared before and after
+each run, and the final table is renamed to the user's result table.
 """
 
 import logging
@@ -31,7 +32,7 @@ log = logging.getLogger(__name__)
 SQL_DIR = Path(__file__).parent / "sql"
 LOCK_NAME = "bio_annotation"
 LOCK_TIMEOUT_S = 3600
-CHROMOSOMES = (*(str(n) for n in range(1, 23)), "x", "y", "mt")
+CHROMOSOMES = (*(str(n) for n in range(1, 23)), "X", "Y", "MT")
 # MySQL indexes a TEXT column only on a prefix (error 1170), and a long VARCHAR would pass the
 # 3072-byte key limit, so string columns longer than this are indexed on their first characters
 INDEX_PREFIX = 255
@@ -86,7 +87,7 @@ VCF = Pipeline(
     },
     input_index="connect_key",
     stages=(
-        Stage("dbsnp", "connect_vcf_dbsnp", "rsID_ALT"),
+        Stage("dbsnp", "connect_vcf_dbsnp", "rsID"),
         Stage("gwas", "connect_vcf_dbsnp_gwas", "connect_key"),
         Stage("1kgp", "connect_vcf_dbsnp_gwas_1kgp", "SNPS"),
         Stage("uniprot", "connect_vcf_dbsnp_gwas_1kgp_uniprot", None),
@@ -106,7 +107,7 @@ ARRAY = Pipeline(
     },
     input_index="rsID",
     stages=(
-        Stage("dbsnp", "connect_vcf_dbsnp_array", "rsID_ALT"),
+        Stage("dbsnp", "connect_vcf_dbsnp_array", "rsID"),
         Stage("gwas", "connect_vcf_dbsnp_gwas_array", "connect_key"),
         Stage("1kgp", "connect_vcf_dbsnp_gwas_1kgp_array", "SNPS"),
         Stage("uniprot", "connect_vcf_dbsnp_gwas_1kgp_uniprot_array", None),
@@ -129,14 +130,19 @@ def _per_chromosome(statement: str) -> list[str]:
         raise ValueError(f"a statement run per chromosome must create its table: {statement[:80]!r}")
     insert = f"{statement[: create.start()]}insert into `{create.group(1)}`{statement[create.end() :]}"
     first, *rest = CHROMOSOMES
-    return [statement.replace("{chrom}", first), *(insert.replace("{chrom}", c) for c in rest)]
+    return [_render(statement, first), *(_render(insert, c) for c in rest)]
+
+
+def _render(statement: str, chrom: str) -> str:
+    return statement.replace("{chrom}", chrom).replace("{suffix}", chrom.lower())
 
 
 def stage_statements(pipeline: Pipeline, stage: Stage) -> list[str]:
     """The statements of a stage in the order they run, with the per-chromosome ones expanded."""
     statements = []
     for statement in split_statements(pipeline.sql_path(stage).read_text(encoding="utf-8")):
-        statements += _per_chromosome(statement) if "{chrom}" in statement else [statement]
+        per_chromosome = "{chrom}" in statement or "{suffix}" in statement
+        statements += _per_chromosome(statement) if per_chromosome else [statement]
     return statements
 
 
@@ -177,6 +183,10 @@ def _execute(conn: Connection, statement: str) -> None:
         cursor.execute(statement)
 
 
+def _count(conn: Connection, table: str) -> int:
+    return conn.exec_driver_sql(f"SELECT COUNT(*) FROM `{table}`").scalar()
+
+
 def _add_index(conn: Connection, table: str, column: str) -> None:
     """Indexes a join column. The stage tables take their column types from the reference
     tables, so the column's length is looked up rather than assumed."""
@@ -201,6 +211,10 @@ def _publish(conn: Connection, final: str, target: str) -> None:
         conn.exec_driver_sql(f"DROP TABLE `{PREVIOUS_RESULT}`")
     else:
         conn.exec_driver_sql(f"RENAME TABLE `{final}` TO `{target}`")
+
+
+class NotInDbsnp(ValueError):
+    """None of the uploaded variants is in dbSNP, usually another genome build or naming."""
 
 
 def run(kind: str, path: Path, user: str) -> int:
@@ -235,6 +249,11 @@ def run(kind: str, path: Path, user: str) -> int:
                 t0 = time.perf_counter()
                 for statement in stage_statements(pipeline, stage):
                     _execute(conn, statement)
+                if stage is pipeline.stages[0] and not _count(conn, stage.table):
+                    raise NotInDbsnp(
+                        f"none of the {len(variants)} variants in {path.name} is in dbSNP (GRCh37): "
+                        "check the genome build and the chromosome names"
+                    )
                 if stage.index:
                     _add_index(conn, stage.table, stage.index)
                 log.info("%s %s: %.1f s", kind, stage.name, time.perf_counter() - t0)
