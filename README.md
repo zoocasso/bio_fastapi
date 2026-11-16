@@ -2,8 +2,8 @@
 
 [![tests](https://github.com/zoocasso/bio_fastapi/actions/workflows/ci.yml/badge.svg)](https://github.com/zoocasso/bio_fastapi/actions/workflows/ci.yml)
 
-Joins a person's genotypes to about 1 TB of public references in four SQL stages and serves a report per disease or trait. Built at Vision Inside in 2022–2023; this code was cleaned up and rewritten in 2026.<br>
-개인 유전형을 공개 레퍼런스 약 1 TB와 4단계 SQL로 이어 질병·형질별 리포트를 만듭니다. 2022~2023년 비전인사이드에서 만들었고, 이 코드는 2026년에 정리해 다시 썼습니다.
+Joins a person's genotypes to about 1 TB of public references in four SQL stages and serves a report per disease or trait. Built at Vision Inside in 2022–2023.<br>
+개인 유전형을 공개 레퍼런스 약 1 TB와 4단계 SQL로 이어 질병·형질별 리포트를 만듭니다. 2022~2023년 비전인사이드에서 만들었습니다.
 
 ```mermaid
 flowchart LR
@@ -52,7 +52,7 @@ A person's genotypes, from a VCF or a genotyping-chip export, are joined to abou
 
 > **Research use only, not a diagnosis.** For an odds ratio the score is (OR − 1) × 100 × risk-allele copies, put into fixed bands: large increase (≥ 100), moderate increase (25 to 99), little change (−24 to 24) and decrease (≤ −25). The bands are cut-offs, not a statistical test. A BETA is in its trait's own unit and gets no score. The pages show the same notice.
 
-This repository holds the service code, cleaned up and rewritten in October 2026. The variant-calling steps upstream of it (BWA, samtools, Picard, GATK) and the loading of the reference tables are not in this repository. The original service ran on an internal server reachable only from the company network; this rewrite has only run on test fixtures and in CI. The original service was built at Vision Inside in 2022–2023, with the pipeline algorithm designed together with the team lead.
+This repository holds the service code. The variant-calling steps upstream of it (BWA, samtools, Picard, GATK) and the loading of the reference tables are not in this repository. The service was built at Vision Inside in 2022–2023, with the pipeline algorithm designed together with the team lead, and ran on an internal server reachable only from the company network; the code in this repository has only run on test fixtures and in CI.
 
 ### How it works
 
@@ -117,7 +117,7 @@ An unknown user is `404` and an invalid user id `400`. An upload is `422` when i
 
 > **연구용이며 진단이 아닙니다.** 오즈비의 점수는 (OR − 1) × 100 × 위험 대립유전자 수이고, 고정 구간으로 나눕니다: 크게 증가(≥ 100), 다소 증가(25~99), 변화 작음(−24~24), 감소(≤ −25). 구간은 정해 둔 기준일 뿐 통계 검정이 아닙니다. BETA는 형질마다 단위가 달라 점수를 매기지 않습니다. 페이지에도 같은 안내가 나옵니다.
 
-이 저장소는 서비스 코드를 2026년 10월에 정리해 다시 쓴 것입니다. 앞단의 변이 호출(BWA, samtools, Picard, GATK)과 레퍼런스 테이블 적재 코드는 이 저장소에 없습니다. 원래 서비스는 사내망에서만 접근할 수 있는 내부 서버에서 운영했고, 이 재작성본은 테스트 데이터와 CI에서만 실행했습니다. 원래 서비스는 2022~2023년 비전인사이드에서 만들었고, 파이프라인 알고리즘은 팀장과 함께 설계했습니다.
+이 저장소에는 서비스 코드가 있습니다. 앞단의 변이 호출(BWA, samtools, Picard, GATK)과 레퍼런스 테이블 적재 코드는 이 저장소에 없습니다. 서비스는 2022~2023년 비전인사이드에서 만들었고(파이프라인 알고리즘은 팀장과 함께 설계), 사내망에서만 접근할 수 있는 내부 서버에서 운영했습니다. 이 저장소의 코드는 테스트 데이터와 CI에서만 실행했습니다.
 
 - **입력**: [`app/inputs.py`](app/inputs.py)가 유전형을 읽습니다. VCF는 PyVCF3, 칩 export는 pandas를 씁니다. 염색체 이름(`chr1` → `1`, `chrM` → `MT`, 칩 코드 23–26과 `XY` → X, Y, X, MT)과 대립유전자(대문자)를 정규화해 SQL이 정확히 비교하게 합니다. VCF 변이는 본인이 가진 ALT로 키를 만들어, `0/2`가 첫 번째 ALT로 읽히지 않습니다.
 - **GWAS 단계**: 위험 대립유전자가 그 변이의 REF나 ALT이면 연관을 남기고, 본인이 가진 개수를 셉니다. 콜이 없거나 유전형이 그 변이의 REF·ALT가 아니면(반대 가닥, I/D 표기) 개수는 0이 아니라 '알 수 없음'이고 점수도 없습니다. 변이가 하나도 dbSNP에 없으면(대개 다른 게놈 빌드) 업로드를 `422`로 거절합니다.
@@ -128,3 +128,8 @@ An unknown user is `404` and an invalid user id `400`. An upload is `422` when i
 - **테스트**: DB 없이도 돌아갑니다. 리포트 조회는 레퍼런스 테이블 일부를 담은 SQLite에서 실제로 실행하고, 파이프라인은 PyMySQL 커서를 거쳐 보내지는 문장과 순서를 검증합니다. `BIO_TEST_MYSQL_URL`에 이름이 `test`로 끝나는 테스트용 DB를 지정하면 레퍼런스 몇 행을 넣은 MySQL에서 파이프라인 전체를 실행하며, CI는 이를 MySQL 8.0과 8.4에서 돌립니다.
 
 실행 방법은 위의 [Run](#run)과 같습니다.
+
+---
+
+<sub>This code is a 2026 cleanup and rewrite of the 2022–2023 original, so the commits are dated 2026.<br>
+이 코드는 2022~2023년 원본을 2026년에 정리해 다시 쓴 것이라 커밋 날짜가 2026년입니다.</sub>
