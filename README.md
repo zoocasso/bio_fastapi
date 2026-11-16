@@ -40,9 +40,21 @@ Joins a person's genotypes to about **1 TB of public references** in four SQL st
 
 A report shows, per disease or trait, the GWAS effect sizes behind it with a rule-of-thumb score, the frequency of each variant in the 26 populations of 1000 Genomes, and related drugs and herbal medicines (MedlinePlus, ATC, PharmDB-K, OASIS). The joins use GRCh37 coordinates.
 
+<img src="docs/live-1000g-populations.png" alt="Live service page: a variant's ratio in each of the 26 populations of 1000 Genomes, with superpopulation and population name" width="400">
+
+<sub>A page of the live service, from the May 2023 project slides: a variant's ratio in each of the 26 populations of 1000 Genomes.</sub>
+
 > **Research use only, not a diagnosis.** For an odds ratio the score is (OR − 1) × 100 × risk-allele copies, put into fixed bands: large increase (≥ 100), moderate increase (25 to 99), little change (−24 to 24) and decrease (≤ −25). The bands are cut-offs, not a statistical test. A BETA is in its trait's own unit and gets no score. The pages show the same notice.
 
 **Not in this repository:** the variant calling upstream (BWA, samtools, Picard, GATK), the loading of the reference tables, and the frontend. The live service ran on an internal server; the code here has only run on test fixtures and in CI.
+
+## Prototype: herbal medicines from disease topics (LDA)
+
+<img src="docs/lda-intertopic-map.png" alt="pyLDAvis view of the LDA model: intertopic distance map of 40 topics and the 30 most salient terms" width="820">
+
+<sub>pyLDAvis view of the topic model (May 2023): 40 topics over MedlinePlus disease summaries, and the 30 most salient terms.</sub>
+
+For a disease or trait with no herbal-medicine entry in PharmDB-K, the prototype weighted each topic's herbal medicines by the disease's topic proportions. It was an experiment in May 2023 and is not part of the service code here.
 
 ## Run
 
