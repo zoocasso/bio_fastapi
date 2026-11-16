@@ -6,37 +6,7 @@ Joins a person's genotypes to about **1 TB of public references** in four SQL st
 
 **Write-up:** [English](https://zoocasso.github.io/en/work/genomics/) · [한국어](https://zoocasso.github.io/work/genomics/)
 
-```mermaid
-flowchart LR
-    fastq["Sequencing reads<br/>FASTQ"]:::ext
-    up["Customer upload<br/>VCF or chip export"]:::ext
-    ref["Public references, ~1 TB<br/>dbSNP 237 GB<br/>1000 Genomes 770 GB<br/>GWAS Catalog, UniProt"]:::ext
-    vcall["Variant calling<br/>BWA → samtools<br/>→ Picard → GATK<br/>not in this repository"]:::shared
-    load["Reference loading<br/>into MySQL, by chromosome<br/>in pandas chunks<br/>not in this repository"]:::shared
-    subgraph repo["This repository"]
-        inp["Input parsing<br/>PyVCF3 · pandas"]:::mine
-        sql["4 SQL stages<br/>dbSNP → GWAS Catalog<br/>→ 1000 Genomes → UniProt"]:::shared
-        api["FastAPI JSON API<br/>and HTML viewer"]:::mine
-    end
-    fe["Frontend<br/>not in this repository"]:::mine
-    fastq --> vcall
-    vcall -->|"VCF"| inp
-    up --> inp
-    ref --> load
-    inp -->|"input table"| sql
-    load -->|"reference tables"| sql
-    sql -->|"result table per user"| api
-    api -->|"JSON"| fe
-    classDef mine fill:#EEF2FF,stroke:#2450F0,stroke-width:2px,color:#0B0D12
-    classDef shared fill:#EEF2FF,stroke:#2450F0,stroke-width:2px,stroke-dasharray:4 3,color:#0B0D12
-    classDef ext fill:#FFFFFF,stroke:#CBD1DA,stroke-width:1px,color:#3F4654
-```
-
-<sub>Solid blue: built by me · dashed blue: algorithm designed with my team lead, implemented by me · white: data sources.</sub>
-
-## At a glance
-
-| | |
+| At&nbsp;a&nbsp;glance | |
 | :--- | :--- |
 | **What** | The backend of a genomic variant annotation and risk-report system, built at Vision Inside for an international project between Kyung Hee University's College of Korean Medicine and a Canadian bio research institute |
 | **My part** | Implemented the pipeline, the backend and the user-facing frontend (the frontend is not in this repository). Deployed the service with Docker and a Harbor registry I set up, on a server reachable only from the company network |
@@ -44,6 +14,12 @@ flowchart LR
 | **Numbers** | Aug 2022 – Sep 2023 · about 1 TB of public references (dbSNP 237 GB, 1000 Genomes 770 GB) · 4 SQL stages · allele frequencies in 26 populations |
 | **Stack** | Python, FastAPI, SQLAlchemy, MySQL, pandas, PyVCF3, Docker, Harbor; upstream BWA, samtools, Picard, GATK |
 | **Run · tests** | [Run](#run) · pytest without a database (SQLite slice of the references), and the whole pipeline on MySQL 8.0 and 8.4 in GitHub Actions |
+
+## Data flow
+
+<img src="docs/diagram.png" alt="Data flow: sequencing reads and customer uploads go through input parsing, four SQL stages joined with about 1 TB of public references, and a FastAPI JSON API and HTML viewer to the frontend" width="800">
+
+<sub>Solid blue: built by me · dashed blue: algorithm designed with my team lead, implemented by me · white: data sources.</sub>
 
 ## Key design decisions
 
@@ -60,11 +36,7 @@ flowchart LR
 - **Unknown is not zero.** A no-call, or a genotype that is not the variant's REF or ALT (the other strand, I/D coding), gets unknown copies and no score instead of 0. An upload with none of its variants in dbSNP, usually another genome build, is refused with `422`.
 - **Tested with and without a database.** Report queries run against an in-memory SQLite slice of the references; the whole pipeline runs on MySQL 8.0 and 8.4 in GitHub Actions.
 
-## What a report looks like
-
-<img src="docs/viewer-overview.png" alt="Overview page of the HTML viewer: research-use notice, trait summary and the table of risk scores" width="720">
-
-<sub>The HTML viewer (`app/viewer.py`) rendered from the test fixtures: sample data, not a real person.</sub>
+## What a report contains
 
 A report shows, per disease or trait, the GWAS effect sizes behind it with a rule-of-thumb score, the frequency of each variant in the 26 populations of 1000 Genomes, and related drugs and herbal medicines (MedlinePlus, ATC, PharmDB-K, OASIS). The joins use GRCh37 coordinates.
 

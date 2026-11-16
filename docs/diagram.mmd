@@ -1,0 +1,23 @@
+flowchart TB
+    fastq["Sequencing reads<br/>FASTQ"]:::ext
+    up["Customer upload<br/>VCF or chip export"]:::ext
+    ref["Public references, ~1 TB<br/>dbSNP 237 GB<br/>1000 Genomes 770 GB<br/>GWAS Catalog, UniProt"]:::ext
+    vcall["Variant calling<br/>BWA → samtools<br/>→ Picard → GATK<br/>not in this repository"]:::shared
+    load["Reference loading<br/>into MySQL, by chromosome<br/>in pandas chunks<br/>not in this repository"]:::shared
+    subgraph repo["This repository"]
+        inp["Input parsing<br/>PyVCF3 · pandas"]:::mine
+        sql["4 SQL stages<br/>dbSNP → GWAS Catalog<br/>→ 1000 Genomes → UniProt"]:::shared
+        api["FastAPI JSON API<br/>and HTML viewer"]:::mine
+    end
+    fe["Frontend<br/>not in this repository"]:::mine
+    fastq --> vcall
+    vcall -->|"VCF"| inp
+    up --> inp
+    ref --> load
+    inp -->|"input table"| sql
+    load -->|"reference tables"| sql
+    sql -->|"result table per user"| api
+    api -->|"JSON"| fe
+    classDef mine fill:#EEF2FF,stroke:#2450F0,stroke-width:2px,color:#0B0D12
+    classDef shared fill:#EEF2FF,stroke:#2450F0,stroke-width:2px,stroke-dasharray:4 3,color:#0B0D12
+    classDef ext fill:#FFFFFF,stroke:#CBD1DA,stroke-width:1px,color:#3F4654
