@@ -27,7 +27,7 @@ Joins a person's genotypes to **public genomic references** (dbSNP, 1000 Genomes
 
 - **Public references in MySQL, joined in stages.** dbSNP and 1000 Genomes were loaded one table per chromosome, and the annotation runs as four SQL stages: dbSNP and 1000 Genomes are joined on position and alleles, the GWAS Catalog and UniProt on rsID (and alleles). Each stage writes a table that the next stage reads.
 - **A rule-based score, not a prediction.** The risk score comes straight from the published GWAS effect sizes with a fixed rule (below), so each score can be traced to the study behind it.
-- **A JSON API for a separate frontend.** In Sep 2023 the pages that the server rendered itself were split into a JSON API, so the frontend could be built on its own.
+- **A JSON API for a separate frontend.** The pages that the server rendered itself were later split into a JSON API, so the frontend could be built on its own.
 - **Deployed with Docker** through a Harbor registry I set up, on a server reachable only from the company network.
 
 **Added in this repository**
@@ -42,7 +42,7 @@ A report shows, per disease or trait, the GWAS effect sizes behind it with a rul
 
 <img src="docs/live-1000g-populations.png" alt="Live service page: a variant's ratio in each of the 26 populations of 1000 Genomes, with superpopulation and population name" width="400">
 
-<sub>A page of the live service, from the May 2023 project slides: a variant's ratio in each of the 26 populations of 1000 Genomes.</sub>
+<sub>A page of the live service, from the project slides: a variant's ratio in each of the 26 populations of 1000 Genomes.</sub>
 
 > **Research use only, not a diagnosis.** For an odds ratio the score is (OR − 1) × 100 × risk-allele copies, put into fixed bands: large increase (≥ 100), moderate increase (25 to 99), little change (−24 to 24) and decrease (≤ −25). The bands are cut-offs, not a statistical test. A BETA is in its trait's own unit and gets no score. The pages show the same notice.
 
@@ -52,9 +52,9 @@ A report shows, per disease or trait, the GWAS effect sizes behind it with a rul
 
 <img src="docs/lda-intertopic-map.png" alt="pyLDAvis view of the LDA model: intertopic distance map of 40 topics and the 30 most salient terms" width="820">
 
-<sub>pyLDAvis view of the topic model (May 2023): 40 topics over MedlinePlus disease summaries, and the 30 most salient terms.</sub>
+<sub>pyLDAvis view of the topic model: 40 topics over MedlinePlus disease summaries, and the 30 most salient terms.</sub>
 
-For a disease or trait with no herbal-medicine entry in PharmDB-K, the prototype weighted each topic's herbal medicines by the disease's topic proportions. It was an experiment in May 2023 and is not part of the service code here.
+For a disease or trait with no herbal-medicine entry in PharmDB-K, the prototype weighted each topic's herbal medicines by the disease's topic proportions. It was an experiment and is not part of the service code here.
 
 ## Run
 
