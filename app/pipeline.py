@@ -1,4 +1,4 @@
-"""The annotation pipeline: a person's variants joined to about 1 TB of public references.
+"""The annotation pipeline: a person's variants joined to public references.
 
     input  ->  dbSNP (rsID)  ->  GWAS Catalog (risk)  ->  1000 Genomes (population frequency)  ->  UniProt
 

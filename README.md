@@ -2,7 +2,7 @@
 
 [![tests](https://github.com/zoocasso/bio_fastapi/actions/workflows/ci.yml/badge.svg)](https://github.com/zoocasso/bio_fastapi/actions/workflows/ci.yml)
 
-Joins a person's genotypes to about **1 TB of public references** in four SQL stages and serves a report per disease or trait. Built at Vision Inside, Aug 2022 – Sep 2023.
+Joins a person's genotypes to **public genomic references** (dbSNP, 1000 Genomes, GWAS Catalog, UniProt) in four SQL stages and serves a report per disease or trait. Built at Vision Inside, Aug 2022 – Sep 2023.
 
 **Write-up:** [English](https://zoocasso.github.io/en/work/genomics/) · [한국어](https://zoocasso.github.io/work/genomics/)
 
@@ -11,13 +11,13 @@ Joins a person's genotypes to about **1 TB of public references** in four SQL st
 | **What** | The backend of a genomic variant annotation and risk-report system, built at Vision Inside for an international project between Kyung Hee University's College of Korean Medicine and a Canadian bio research institute |
 | **My part** | Implemented the pipeline, the backend and the user-facing frontend (the frontend is not in this repository). Deployed the service with Docker and a Harbor registry I set up, on a server reachable only from the company network |
 | **Others** | The pipeline algorithm was designed together with my team lead |
-| **Numbers** | Aug 2022 – Sep 2023 · about 1 TB of public references (dbSNP 237 GB, 1000 Genomes 770 GB) · 4 SQL stages · allele frequencies in 26 populations |
+| **Numbers** | Aug 2022 – Sep 2023 · 4 SQL stages · allele frequencies in 26 populations |
 | **Stack** | Python, FastAPI, SQLAlchemy, MySQL, pandas, PyVCF3, Docker, Harbor; upstream BWA, samtools, Picard, GATK |
 | **Run · tests** | [Run](#run) · pytest without a database (SQLite slice of the references), and the whole pipeline on MySQL 8.0 and 8.4 in GitHub Actions |
 
 ## Data flow
 
-<img src="docs/diagram.png" alt="Data flow: sequencing reads and customer uploads go through input parsing, four SQL stages joined with about 1 TB of public references, and a FastAPI JSON API and HTML viewer to the frontend" width="800">
+<img src="docs/diagram.png" alt="Data flow: sequencing reads and customer uploads go through input parsing, four SQL stages joined with public references, and a FastAPI JSON API and HTML viewer to the frontend" width="800">
 
 <sub>Solid blue: built by me · dashed blue: algorithm designed with my team lead, implemented by me · white: data sources.</sub>
 
@@ -25,7 +25,7 @@ Joins a person's genotypes to about **1 TB of public references** in four SQL st
 
 **In the live service (2022–2023)**
 
-- **About 1 TB in MySQL, joined in stages.** dbSNP and 1000 Genomes were loaded one table per chromosome, and the annotation runs as four SQL stages: dbSNP and 1000 Genomes are joined on position and alleles, the GWAS Catalog and UniProt on rsID (and alleles). Each stage writes a table that the next stage reads.
+- **Public references in MySQL, joined in stages.** dbSNP and 1000 Genomes were loaded one table per chromosome, and the annotation runs as four SQL stages: dbSNP and 1000 Genomes are joined on position and alleles, the GWAS Catalog and UniProt on rsID (and alleles). Each stage writes a table that the next stage reads.
 - **A rule-based score, not a prediction.** The risk score comes straight from the published GWAS effect sizes with a fixed rule (below), so each score can be traced to the study behind it.
 - **A JSON API for a separate frontend.** In Sep 2023 the pages that the server rendered itself were split into a JSON API, so the frontend could be built on its own.
 - **Deployed with Docker** through a Harbor registry I set up, on a server reachable only from the company network.

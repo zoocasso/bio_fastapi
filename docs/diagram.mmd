@@ -1,7 +1,7 @@
 flowchart TB
     fastq["Sequencing reads<br/>FASTQ"]:::ext
     up["Customer upload<br/>VCF or chip export"]:::ext
-    ref["Public references, ~1 TB<br/>dbSNP 237 GB<br/>1000 Genomes 770 GB<br/>GWAS Catalog, UniProt"]:::ext
+    ref["Public references<br/>dbSNP, 1000 Genomes<br/>GWAS Catalog, UniProt"]:::ext
     vcall["Variant calling<br/>BWA → samtools<br/>→ Picard → GATK<br/>not in this repository"]:::shared
     load["Reference loading<br/>into MySQL, by chromosome<br/>in pandas chunks<br/>not in this repository"]:::shared
     subgraph repo["This repository"]
